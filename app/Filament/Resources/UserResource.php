@@ -48,6 +48,9 @@ class UserResource extends Resource
                     ->multiple()
                     ->preload()
                     ->searchable(),
+                Forms\Components\TextInput::make('chat_id')
+                    ->label(__('Телеграм Чат ID'))
+                    ->maxLength(255)
             ]);
     }
 

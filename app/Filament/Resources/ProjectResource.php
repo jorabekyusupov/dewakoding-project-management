@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ProjectResource extends Resource
 {
@@ -74,6 +75,27 @@ class ProjectResource extends Resource
                     ->displayFormat('d/m/Y H:i')
                     ->visible(fn ($get) => $get('is_pinned'))
                     ->dehydrated(true),
+                Forms\Components\FileUpload::make('file')
+                    ->label(__('file'))
+                    ->columnSpanFull()
+                    ->disk('public')
+                    ->directory('project_files')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn(TemporaryUploadedFile $file): string => (string)str($file->getClientOriginalName())
+                            ->prepend('project-file-'),
+                    ),
+                Forms\Components\TextInput::make('chat_id')
+                    ->label('Телеграм Чат ID')
+                    ->helperText('Для вашей нужной группы
+Добавьте бота @myidbot и из этой группы
+Вы отправляете команду /getgroupid и получаете ID группы, который нужно указать здесь')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('thread_id')
+                    ->label('Телеграм Чат Тема ID')
+                    ->helperText('Вы присоединитесь к соответствующей группе Chat ID, указанной выше, и выберите в ней тему, которая вам принадлежит, чтобы скопировать ссылку на любое сообщение, и ссылка будет выглядеть так:
+https://t.me/c/2535102279/3/60 и номер 3 в нем является идентификатором этой темы.
+https://t.me/c/2535102279/Нам нужен ID/60')
+                    ->maxLength(255),
             ]);
     }
 

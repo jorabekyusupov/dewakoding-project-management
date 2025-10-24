@@ -16,6 +16,7 @@ use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Epic;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class TicketResource extends Resource
 {
@@ -126,7 +127,15 @@ class TicketResource extends Resource
                     ->label('Description')
                     ->fileAttachmentsDirectory('attachments')
                     ->columnSpanFull(),
-
+                Forms\Components\FileUpload::make('file')
+                    ->label(__('file'))
+                    ->columnSpanFull()
+                    ->disk('public')
+                    ->directory('task_files')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn(TemporaryUploadedFile $file): string => (string)str($file->getClientOriginalName())
+                            ->prepend('task-file-'),
+                    ),
                 // Multi-user assignment
                 Forms\Components\Select::make('assignees')
                     ->label('Assigned to')

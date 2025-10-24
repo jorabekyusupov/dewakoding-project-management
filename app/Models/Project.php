@@ -20,6 +20,10 @@ class Project extends Model
         'start_date',
         'end_date',
         'pinned_date',
+        'file',
+        'chat_id',
+        'thread_id',
+
     ];
 
     protected $casts = [
