@@ -85,10 +85,8 @@
                                                 'Approaching Deadline' => 'warning',
                                                 'In Progress' => 'primary',
                                                 'Not Started' => 'gray',
-                                                default => 'gray'
+                                                default => 'gray',
                                             };
-                                            default => 'gray'
-                                        };
 
                                         $statusKey = Str::of($project['status'])->lower()->replace(' ', '_')->replace('-', '_');
                                         @endphp

@@ -16,6 +16,7 @@ class ProjectSeeder extends Seeder
         DB::unprepared(file_get_contents(database_path('data/tickets.sql')));
         DB::unprepared(file_get_contents(database_path('data/ticket_users.sql')));
         DB::unprepared(file_get_contents(database_path('data/ticket_comments.sql')));
+        DB::unprepared(file_get_contents(database_path('data/role_has_permissions.sql')));
 
     }
 }
