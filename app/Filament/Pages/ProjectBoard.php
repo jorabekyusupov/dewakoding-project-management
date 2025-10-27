@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Form;
+use App\Services\TicketNotificationService;
 
 class ProjectBoard extends Page
 {
@@ -63,6 +64,13 @@ class ProjectBoard extends Page
     public array $selectedUserIds = [];
     
     public Collection $projectUsers;
+
+    protected TicketNotificationService $ticketNotificationService;
+
+    public function boot(TicketNotificationService $ticketNotificationService): void
+    {
+        $this->ticketNotificationService = $ticketNotificationService;
+    }
 
     public function mount($project_id = null): void
     {
@@ -214,7 +222,7 @@ class ProjectBoard extends Page
     #[On('ticket-moved')]
     public function moveTicket($ticketId, $newStatusId): void
     {
-        $ticket = Ticket::find($ticketId);
+        $ticket = Ticket::with(['status', 'project', 'priority', 'assignees', 'creator', 'epic'])->find($ticketId);
 
         if ($ticket && $ticket->project_id === $this->selectedProject?->id) {
             if (!$this->canManageTicket($ticket)) {
@@ -226,9 +234,24 @@ class ProjectBoard extends Page
                 return;
             }
 
+            if ((int) $ticket->ticket_status_id === (int) $newStatusId) {
+                return;
+            }
+
+            $oldStatusName = $ticket->status?->name ?? 'N/A';
+
             $ticket->update([
                 'ticket_status_id' => $newStatusId,
             ]);
+
+            $ticket->refresh()->load(['project', 'priority', 'creator', 'assignees', 'status', 'epic']);
+            $newStatusName = $ticket->status?->name ?? 'N/A';
+
+            try {
+                $this->ticketNotificationService->notifyTicketStatusChanged($ticket, $oldStatusName, $newStatusName);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
 
             $this->loadTicketStatuses();
 

@@ -25,6 +25,7 @@ class TicketNotificationService
             'epic',
         ]);
 
+
         $assignees = $ticket->assignees->pluck('name')->implode(', ');
         $assigneesChatIDs = $ticket->assignees->pluck('chat_id')->filter()->all();
 
@@ -43,6 +44,7 @@ class TicketNotificationService
             'creator',
             'assignees',
         ]);
+
 
         $assignees = $ticket->assignees->pluck('name')->implode(', ');
         $assigneesChatIDs = $ticket->assignees->pluck('chat_id')->filter()->all();

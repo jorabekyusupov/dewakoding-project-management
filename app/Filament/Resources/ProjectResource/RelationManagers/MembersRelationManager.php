@@ -10,10 +10,18 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\TicketNotificationService;
 
 class MembersRelationManager extends RelationManager
 {
     protected static string $relationship = 'members';
+
+    protected TicketNotificationService $ticketNotificationService;
+
+    public function boot(TicketNotificationService $ticketNotificationService): void
+    {
+        $this->ticketNotificationService = $ticketNotificationService;
+    }
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
@@ -53,8 +61,16 @@ class MembersRelationManager extends RelationManager
                         $user = User::find($record->id);
                         $assignedBy = auth()->user();
                         
-                        if ($user && $assignedBy) {
-                            ProjectMemberAttached::dispatch($project, $user, $assignedBy);
+                        if ($user) {
+                            if ($assignedBy) {
+                                ProjectMemberAttached::dispatch($project, $user, $assignedBy);
+                            }
+
+                            try {
+                                $this->ticketNotificationService->notifyProjectMemberAdded($project, $user);
+                            } catch (\Throwable $exception) {
+                                report($exception);
+                            }
                         }
                     }),
             ])

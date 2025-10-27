@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\Epic;
+use App\Models\Ticket;
 use App\Models\TicketStatus;
 use App\Models\TicketPriority;
 use Filament\Forms;
@@ -21,10 +22,22 @@ use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use App\Services\TicketNotificationService;
 
 class TicketsRelationManager extends RelationManager
 {
     protected static string $relationship = 'tickets';
+
+    protected TicketNotificationService $ticketNotificationService;
+
+    protected ?int $editingTicketOriginalStatusId = null;
+
+    protected ?string $editingTicketOriginalStatusName = null;
+
+    public function boot(TicketNotificationService $ticketNotificationService): void
+    {
+        $this->ticketNotificationService = $ticketNotificationService;
+    }
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
@@ -219,6 +232,14 @@ class TicketsRelationManager extends RelationManager
                         $data['project_id'] = $this->getOwnerRecord()->id;
                         $data['created_by'] = auth()->id();
                         return $data;
+                    })
+                    ->after(function (Model $record): void {
+                        if (! $record instanceof Ticket) {
+                            return;
+                        }
+
+                        $record->load(['project', 'priority', 'creator', 'assignees', 'status', 'epic']);
+                        $this->sendTicketCreatedNotification($record);
                     }),
                 
                 // NEW: Import from Excel action
@@ -338,7 +359,37 @@ class TicketsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->beforeFormFilled(function (Model $record): void {
+                        if (! $record instanceof Ticket) {
+                            $this->resetEditingTicketStatusSnapshot();
+
+                            return;
+                        }
+
+                        $record->loadMissing('status');
+                        $this->editingTicketOriginalStatusId = $record->ticket_status_id;
+                        $this->editingTicketOriginalStatusName = $record->status?->name;
+                    })
+                    ->after(function (Model $record): void {
+                        if (! $record instanceof Ticket) {
+                            $this->resetEditingTicketStatusSnapshot();
+
+                            return;
+                        }
+
+                        $statusChanged = $this->editingTicketOriginalStatusId !== null
+                            && (int) $this->editingTicketOriginalStatusId !== (int) $record->ticket_status_id;
+
+                        if ($statusChanged) {
+                            $record->refresh()->load(['project', 'priority', 'creator', 'assignees', 'status', 'epic']);
+                            $oldStatus = $this->editingTicketOriginalStatusName ?? 'N/A';
+                            $newStatus = $record->status?->name ?? 'N/A';
+                            $this->sendTicketStatusChangedNotification($record, $oldStatus, $newStatus);
+                        }
+
+                        $this->resetEditingTicketStatusSnapshot();
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -360,18 +411,50 @@ class TicketsRelationManager extends RelationManager
                                 })
                                 ->required(),
                         ])
-                        ->action(function (array $data, Collection $records) {
+                        ->action(function (array $data, Collection $records): void {
+                            $newStatusId = $data['ticket_status_id'] ?? null;
+
+                            if (empty($newStatusId)) {
+                                return;
+                            }
+
+                            $updatedCount = 0;
+
                             foreach ($records as $record) {
+                                if (! $record instanceof Ticket) {
+                                    continue;
+                                }
+
+                                if ((int) $record->ticket_status_id === (int) $newStatusId) {
+                                    continue;
+                                }
+
+                                $record->load(['project', 'priority', 'creator', 'assignees', 'status', 'epic']);
+                                $oldStatus = $record->status?->name ?? 'N/A';
+
                                 $record->update([
-                                    'ticket_status_id' => $data['ticket_status_id'],
+                                    'ticket_status_id' => $newStatusId,
                                 ]);
+
+                                $record->refresh()->load(['project', 'priority', 'creator', 'assignees', 'status', 'epic']);
+                                $newStatus = $record->status?->name ?? 'N/A';
+                                $this->sendTicketStatusChangedNotification($record, $oldStatus, $newStatus);
+                                $updatedCount++;
                             }
                             
-                            Notification::make()
-                                ->success()
-                                ->title('Status updated')
-                                ->body(count($records) . ' tickets have been updated.')
-                                ->send();
+                            if ($updatedCount > 0) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Status updated')
+                                    ->body($updatedCount . ' tickets have been updated.')
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->info()
+                                    ->title('No changes applied')
+                                    ->body('Selected tickets are already in the chosen status.')
+                                    ->send();
+                            }
                         }),
                     
                     // NEW: Bulk assign users
@@ -470,5 +553,29 @@ class TicketsRelationManager extends RelationManager
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    private function sendTicketCreatedNotification(Ticket $ticket): void
+    {
+        try {
+            $this->ticketNotificationService->notifyTicketCreated($ticket);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
+    private function sendTicketStatusChangedNotification(Ticket $ticket, string $oldStatus, string $newStatus): void
+    {
+        try {
+            $this->ticketNotificationService->notifyTicketStatusChanged($ticket, $oldStatus, $newStatus);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
+    private function resetEditingTicketStatusSnapshot(): void
+    {
+        $this->editingTicketOriginalStatusId = null;
+        $this->editingTicketOriginalStatusName = null;
     }
 }
