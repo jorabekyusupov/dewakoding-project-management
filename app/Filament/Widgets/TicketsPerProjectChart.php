@@ -12,7 +12,7 @@ class TicketsPerProjectChart extends ChartWidget
 {
     use HasWidgetShield;
     
-    protected static ?string $heading = 'Number of tickets per project';
+    protected static ?string $heading = null;
     
     protected static ?int $sort = 2;
     
@@ -24,8 +24,13 @@ class TicketsPerProjectChart extends ChartWidget
     protected static ?string $maxHeight = '300px';
     
     protected static ?string $pollingInterval = '30s';
+
+    public function getHeading(): ?string
+    {
+        return __('widgets.tickets_per_project.heading');
+    }
     
-    protected function getData(): array
+    public function getData(): array
     {
         $user = auth()->user();
         $isSuperAdmin = $user->hasRole('super_admin');
@@ -69,7 +74,7 @@ class TicketsPerProjectChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Jumlah Ticket',
+                    'label' => __('widgets.tickets_per_project.dataset.tickets'),
                     'data' => $data,
                     'backgroundColor' => $colors,
                     'borderColor' => $colors,
@@ -80,12 +85,12 @@ class TicketsPerProjectChart extends ChartWidget
         ];
     }
     
-    protected function getType(): string
+    public function getType(): string
     {
         return 'bar';
     }
     
-    protected function getOptions(): array
+    public function getOptions(): array
     {
         return [
             'plugins' => [

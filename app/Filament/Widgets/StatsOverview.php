@@ -29,7 +29,7 @@ class StatsOverview extends BaseWidget
         }
     }
 
-    protected function getSuperAdminStats(): array
+    public function getSuperAdminStats(): array
     {
         $totalProjects = Project::count();
         $totalTickets = Ticket::count();
@@ -40,29 +40,29 @@ class StatsOverview extends BaseWidget
             ->count();
 
         return [
-            Stat::make('Total Projects', $totalProjects)
-                ->description('Active projects in the system')
+            Stat::make(__('widgets.stats_overview.cards.total_projects.title'), $totalProjects)
+                ->description(__('widgets.stats_overview.cards.total_projects.description'))
                 ->descriptionIcon('heroicon-m-rectangle-stack')
                 ->color('primary'),
 
-            Stat::make('Total Tickets', $totalTickets)
-                ->description('Tickets across all projects')
+            Stat::make(__('widgets.stats_overview.cards.total_tickets.title'), $totalTickets)
+                ->description(__('widgets.stats_overview.cards.total_tickets.description'))
                 ->descriptionIcon('heroicon-m-ticket')
                 ->color('success'),
 
-            Stat::make('My Assigned Tickets', $myTickets)
-                ->description('Tickets assigned to you')
+            Stat::make(__('widgets.stats_overview.cards.my_assigned_tickets.title'), $myTickets)
+                ->description(__('widgets.stats_overview.cards.my_assigned_tickets.description'))
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color('info'),
 
-            Stat::make('Team Members', $usersCount)
-                ->description('Registered users')
+            Stat::make(__('widgets.stats_overview.cards.team_members.title'), $usersCount)
+                ->description(__('widgets.stats_overview.cards.team_members.description'))
                 ->descriptionIcon('heroicon-m-users')
                 ->color('gray'),
         ];
     }
 
-    protected function getUserStats(): array
+    public function getUserStats(): array
     {
         $user = auth()->user();
         
@@ -104,42 +104,42 @@ class StatsOverview extends BaseWidget
         })->where('id', '!=', $user->id)->count();
 
         return [
-            Stat::make('My Projects', $myProjects)
-                ->description('Projects you are member of')
+            Stat::make(__('widgets.stats_overview.cards.my_projects.title'), $myProjects)
+                ->description(__('widgets.stats_overview.cards.my_projects.description'))
                 ->descriptionIcon('heroicon-m-rectangle-stack')
                 ->color('primary'),
 
-            Stat::make('My Assigned Tickets', $myAssignedTickets)
-                ->description('Tickets assigned to you')
+            Stat::make(__('widgets.stats_overview.cards.my_assigned_tickets.title'), $myAssignedTickets)
+                ->description(__('widgets.stats_overview.cards.my_assigned_tickets.description'))
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color($myAssignedTickets > 10 ? 'danger' : ($myAssignedTickets > 5 ? 'warning' : 'success')),
 
-            Stat::make('My Created Tickets', $myCreatedTickets)
-                ->description('Tickets you created')
+            Stat::make(__('widgets.stats_overview.cards.my_created_tickets.title'), $myCreatedTickets)
+                ->description(__('widgets.stats_overview.cards.my_created_tickets.description'))
                 ->descriptionIcon('heroicon-m-pencil-square')
                 ->color('info'),
 
-            Stat::make('Project Tickets', $projectTickets)
-                ->description('Total tickets in your projects')
+            Stat::make(__('widgets.stats_overview.cards.project_tickets.title'), $projectTickets)
+                ->description(__('widgets.stats_overview.cards.project_tickets.description'))
                 ->descriptionIcon('heroicon-m-ticket')
                 ->color('success'),
 
-            Stat::make('Completed This Week', $myCompletedThisWeek)
-                ->description('Your completed tickets')
+            Stat::make(__('widgets.stats_overview.cards.completed_this_week.title'), $myCompletedThisWeek)
+                ->description(__('widgets.stats_overview.cards.completed_this_week.description'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color($myCompletedThisWeek > 0 ? 'success' : 'gray'),
 
-            Stat::make('New Tasks This Week', $newTicketsThisWeek)
-                ->description('Created in your projects')
+            Stat::make(__('widgets.stats_overview.cards.new_tasks_this_week.title'), $newTicketsThisWeek)
+                ->description(__('widgets.stats_overview.cards.new_tasks_this_week.description'))
                 ->descriptionIcon('heroicon-m-plus-circle')
                 ->color('info'),
 
-            Stat::make('My Overdue Tasks', $myOverdueTickets)
-                ->description('Your past due tickets')
+            Stat::make(__('widgets.stats_overview.cards.my_overdue_tasks.title'), $myOverdueTickets)
+                ->description(__('widgets.stats_overview.cards.my_overdue_tasks.description'))
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($myOverdueTickets > 0 ? 'danger' : 'success'),
 
-            Stat::make('Team Members', $teamMembers)
+            Stat::make(__('widgets.stats_overview.cards.team_members.title'), $teamMembers)
                 ->description('People in your projects')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('gray'),

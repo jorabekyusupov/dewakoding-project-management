@@ -17,16 +17,31 @@ class TicketTimeline extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
-    protected static ?string $navigationLabel = 'Ticket Timeline';
-    protected static ?string $title = 'Ticket Timeline';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
     protected static ?int $navigationSort = 6;
     protected static string $view = 'filament.pages.ticket-timeline';
-    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $navigationGroup = null;
     protected static ?string $slug = 'ticket-timeline/{project_id?}';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.ticket_timeline.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.ticket_timeline.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.project_management');
+    }
 
     public function getSubheading(): ?string
     {
-        return 'View project tickets in Gantt chart timeline';
+        return __('pages.ticket_timeline.subheading');
     }
     public ?string $projectId = null;
     public Collection $projects;
@@ -55,7 +70,7 @@ class TicketTimeline extends Page implements HasForms
             \Log::error('Error in TicketTimeline mount: ' . $e->getMessage());
             
             Notification::make()
-                ->title('Error loading page')
+                ->title(__('pages.ticket_timeline.notifications.error_loading'))
                 ->danger()
                 ->send();
         }
@@ -83,7 +98,7 @@ class TicketTimeline extends Page implements HasForms
             $this->redirect(static::getUrl(['project_id' => $projectId]), navigate: true);
         } else {
             Notification::make()
-                ->title('Project Not Found')
+                ->title(__('pages.ticket_timeline.notifications.project_not_found'))
                 ->danger()
                 ->send();
                 
@@ -140,7 +155,7 @@ class TicketTimeline extends Page implements HasForms
                     
                     $taskData = [
                         'id' => (string) $ticket->id,
-                        'text' => $this->truncateName($ticket->name ?? 'Untitled Ticket'),
+                        'text' => $this->truncateName($ticket->name ?? __('pages.ticket_timeline.task.untitled')),
                         'start_date' => $startDate->format('d-m-Y H:i'),
                         'end_date' => $endDate->format('d-m-Y H:i'),
                         'duration' => max(1, $startDate->diffInDays($endDate)),
@@ -149,7 +164,7 @@ class TicketTimeline extends Page implements HasForms
                         'readonly' => true,
                         'color' => $isOverdue ? '#ef4444' : ($ticket->status->color ?? '#3b82f6'),
                         'textColor' => '#ffffff',
-                        'status' => $ticket->status->name ?? 'Unknown',
+                        'status' => $ticket->status->name ?? __('pages.ticket_timeline.task.unknown_status'),
                         'is_overdue' => $isOverdue
                     ];
                     

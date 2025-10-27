@@ -10,11 +10,21 @@ use Carbon\Carbon;
 class ProjectTimeline extends Page
 {
     protected static string $view = 'filament.pages.project-timeline';
-    protected static ?string $navigationLabel = 'Project Timeline';
+    protected static ?string $navigationLabel = null;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $navigationGroup = null;
     protected static ?int $navigationSort = 3;
     protected static ?string $slug = 'project-timeline';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.project_timeline.navigation_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.project_management');
+    }
     
     public array $counts = [];
     public array $ganttData = ['data' => [], 'links' => []];
@@ -75,16 +85,16 @@ class ProjectTimeline extends Page
             $isNearlyComplete = $progress >= 0.8;
             
             if ($isOverdue) {
-                $status = 'Overdue';
+                $status = __('pages.project_timeline.status.overdue');
                 $color = '#ef4444';
             } elseif ($isNearlyComplete) {
-                $status = 'Nearly Complete';
+                $status = __('pages.project_timeline.status.nearly_complete');
                 $color = '#10b981';
             } elseif ($isNearDeadline) {
-                $status = 'Approaching Deadline';
+                $status = __('pages.project_timeline.status.approaching_deadline');
                 $color = '#f59e0b';
             } else {
-                $status = 'In Progress';
+                $status = __('pages.project_timeline.status.in_progress');
                 $color = '#3b82f6';
             }
             

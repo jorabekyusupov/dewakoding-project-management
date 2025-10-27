@@ -33,16 +33,20 @@ class TicketCommentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('ticket.name')
+                    ->label(__('resources.ticket_comments.columns.ticket'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
+                    ->label(__('resources.ticket_comments.columns.user'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('resources.ticket_comments.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('resources.ticket_comments.columns.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

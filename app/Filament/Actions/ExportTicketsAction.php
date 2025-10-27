@@ -15,26 +15,26 @@ class ExportTicketsAction
     public static function make(): Action
     {
         return Action::make('export_tickets')
-            ->label('Export to Excel')
+            ->label(__('actions.export_tickets.label'))
             ->icon('heroicon-m-arrow-down-tray')
             ->color('success')
             ->form([
-                Section::make('Select Columns to Export')
-                    ->description('Choose which columns you want to include in the Excel export')
+                Section::make(__('actions.export_tickets.section_title'))
+                    ->description(__('actions.export_tickets.section_description'))
                     ->schema([
                         CheckboxList::make('columns')
-                            ->label('Columns')
+                            ->label(__('actions.export_tickets.columns.label'))
                             ->options([
-                                'uuid' => 'Ticket ID',
-                                'name' => 'Title',
-                                'description' => 'Description',
-                                'status' => 'Status',
-                                'assignee' => 'Assignee',
-                                'project' => 'Project',
-                                'epic' => 'Epic',
-                                'due_date' => 'Due Date',
-                                'created_at' => 'Created At',
-                                'updated_at' => 'Updated At',
+                                'uuid' => __('actions.export_tickets.columns.uuid'),
+                                'name' => __('actions.export_tickets.columns.name'),
+                                'description' => __('actions.export_tickets.columns.description'),
+                                'status' => __('actions.export_tickets.columns.status'),
+                                'assignee' => __('actions.export_tickets.columns.assignee'),
+                                'project' => __('actions.export_tickets.columns.project'),
+                                'epic' => __('actions.export_tickets.columns.epic'),
+                                'due_date' => __('actions.export_tickets.columns.due_date'),
+                                'created_at' => __('actions.export_tickets.columns.created_at'),
+                                'updated_at' => __('actions.export_tickets.columns.updated_at'),
                             ])
                             ->default(['uuid', 'name', 'status', 'assignee', 'due_date', 'created_at'])
                             ->required()

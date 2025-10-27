@@ -21,15 +21,15 @@ class ImportTicketsAction
     public static function make(): Action
     {
         return Action::make('import_tickets')
-            ->label('Import from Excel')
+            ->label(__('actions.import_tickets.label'))
             ->icon('heroicon-m-arrow-up-tray')
             ->color('success')
             ->form([
-                Section::make('Import Tickets from Excel')
-                    ->description('Select a project and upload an Excel file to import tickets. You can download the template below after selecting a project.')
+                Section::make(__('actions.import_tickets.section_title'))
+                    ->description(__('actions.import_tickets.section_description'))
                     ->schema([
                         Select::make('project_id')
-                            ->label('Select Project')
+                            ->label(__('actions.import_tickets.select_project'))
                             ->options(function () {
                                 return Project::query()
                                     ->whereHas('members', function ($query) {
@@ -53,7 +53,7 @@ class ImportTicketsAction
                         
                         Actions::make([
                             FormAction::make('download_template')
-                                ->label('Download Import Template')
+                                ->label(__('actions.import_tickets.download_template'))
                                 ->icon('heroicon-m-arrow-down-tray')
                                 ->color('info')
                                 ->visible(fn ($get) => $get('project_id'))
@@ -61,8 +61,8 @@ class ImportTicketsAction
                                     $projectId = $get('project_id');
                                     if (!$projectId) {
                                         Notification::make()
-                                            ->title('Error')
-                                            ->body('Please select a project first.')
+                                            ->title(__('actions.import_tickets.notifications.error.title'))
+                                            ->body(__('actions.import_tickets.notifications.error.body'))
                                             ->danger()
                                             ->send();
                                         return;
@@ -79,8 +79,8 @@ class ImportTicketsAction
                         ])->fullWidth(),
                         
                         FileUpload::make('excel_file')
-                            ->label('Excel File')
-                            ->helperText('Upload the Excel file with ticket data. Make sure to use the template format above.')
+                            ->label(__('actions.import_tickets.file.label'))
+                            ->helperText(__('actions.import_tickets.file.helper'))
                             ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
                             ->maxSize(5120) // 5MB
                             ->required()
@@ -106,14 +106,17 @@ class ImportTicketsAction
                     Storage::disk('local')->delete($data['excel_file']);
                     
                     if ($importedCount > 0) {
-                        $message = "Successfully imported {$importedCount} ticket(s) to project '{$project->name}'.";
+                        $message = __('actions.import_tickets.notifications.success.body', [
+                            'count' => $importedCount,
+                            'project' => $project->name,
+                        ]);
                         
                         if (count($errors) > 0 || count($failures) > 0) {
-                            $message .= " Some rows had errors and were skipped.";
+                            $message .= ' ' . __('actions.import_tickets.notifications.success.partial');
                         }
                         
                         Notification::make()
-                            ->title('Import Completed')
+                            ->title(__('actions.import_tickets.notifications.success.title'))
                             ->body($message)
                             ->success()
                             ->send();
@@ -149,7 +152,7 @@ class ImportTicketsAction
                         }
                         
                         Notification::make()
-                            ->title('Import Failed')
+                            ->title(__('actions.import_tickets.notifications.failed.title'))
                             ->body(implode("\n", $errorDetails))
                             ->warning()
                             ->persistent()
@@ -173,7 +176,7 @@ class ImportTicketsAction
                     }
                     
                     Notification::make()
-                        ->title('Import Error')
+                        ->title(__('actions.import_tickets.notifications.error_generic.title'))
                         ->body($errorMessage)
                         ->danger()
                         ->persistent()

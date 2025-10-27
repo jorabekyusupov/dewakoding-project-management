@@ -15,12 +15,12 @@ class DownloadTicketTemplateAction
     public static function make(): Action
     {
         return Action::make('download_template')
-            ->label('Download Import Template')
+            ->label(__('actions.download_template.label'))
             ->icon('heroicon-m-arrow-down-tray')
             ->color('info')
             ->form([
                 Select::make('project_id')
-                    ->label('Select Project')
+                    ->label(__('actions.download_template.select_project'))
                     ->options(function () {
                         return Project::query()
                             ->whereHas('members', function ($query) {
@@ -44,8 +44,10 @@ class DownloadTicketTemplateAction
                 $filename = preg_replace('/[^A-Za-z0-9\\-_.]/', '', $filename);
                 
                 Notification::make()
-                    ->title('Template Downloaded')
-                    ->body("Import template for project '{$project->name}' has been downloaded.")
+                    ->title(__('actions.download_template.notifications.success.title'))
+                    ->body(__('actions.download_template.notifications.success.body', [
+                        'project' => $project->name,
+                    ]))
                     ->success()
                     ->send();
                 

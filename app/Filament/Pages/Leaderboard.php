@@ -17,19 +17,34 @@ class Leaderboard extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    protected static ?string $navigationLabel = 'Leaderboard';
-    protected static ?string $title = 'Contribution Leaderboard';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
     protected static ?int $navigationSort = 6;
     protected static string $view = 'filament.pages.leaderboard';
-    protected static ?string $navigationGroup = 'Analytics';
+    protected static ?string $navigationGroup = null;
     protected static ?string $slug = 'leaderboard';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.leaderboard.navigation_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.analytics');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.leaderboard.title');
+    }
 
     public string $timeRange = '7days'; // Changed from 'thisweek' to '7days'
     public int $topCount = 10; // Number of top contributors to show
 
     public function getSubheading(): ?string
     {
-        return 'Top contributors ranked by their overall activity and engagement';
+        return __('pages.leaderboard.subheading');
     }
 
     public function setTimeRange(string $range): void
@@ -204,11 +219,11 @@ class Leaderboard extends Page implements HasForms
     public function getTimeRangeLabel(): string
     {
         return match($this->timeRange) {
-            '7days' => 'Last 7 Days',
-            '30days' => 'Last 30 Days', 
-            'thisweek' => 'This Week',
-            '1month' => 'Last Month',
-            default => 'Last 7 Days'
+            '7days' => __('pages.leaderboard.time_range.7days'),
+            '30days' => __('pages.leaderboard.time_range.30days'),
+            'thisweek' => __('pages.leaderboard.time_range.thisweek'),
+            '1month' => __('pages.leaderboard.time_range.1month'),
+            default => __('pages.leaderboard.time_range.7days'),
         };
     }
 

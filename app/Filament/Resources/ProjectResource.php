@@ -23,8 +23,13 @@ class ProjectResource extends Resource
     protected static ?string $model = Project::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $navigationGroup = null;
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.project_management');
+    }
 
     public static function form(Form $form): Form
     {
@@ -39,24 +44,24 @@ class ProjectResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('start_date')
-                    ->label('Start Date')
+                    ->label(__('resources.projects.form.start_date'))
                     ->native(false)
                     ->displayFormat('d/m/Y'),
                 Forms\Components\DatePicker::make('end_date')
-                    ->label('End Date')
+                    ->label(__('resources.projects.form.end_date'))
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->afterOrEqual('start_date'),
                 Forms\Components\Toggle::make('create_default_statuses')
-                    ->label('Use Default Ticket Statuses')
-                    ->helperText('Create standard Backlog, To Do, In Progress, Review, and Done statuses automatically')
+                    ->label(__('resources.projects.form.use_default_statuses'))
+                    ->helperText(__('resources.projects.form.use_default_statuses_help'))
                     ->default(true)
                     ->dehydrated(false)
                     ->visible(fn ($livewire) => $livewire instanceof Pages\CreateProject),
                 
                 Forms\Components\Toggle::make('is_pinned')
-                    ->label('Pin Project')
-                    ->helperText('Pinned projects will appear in the dashboard timeline')
+                    ->label(__('resources.projects.form.pin_project'))
+                    ->helperText(__('resources.projects.form.pin_project_help'))
                     ->live()
                     ->afterStateUpdated(function ($state, $set) {
                         if ($state) {
@@ -70,7 +75,7 @@ class ProjectResource extends Resource
                         $component->state(!is_null($get('pinned_date')));
                     }),
                 Forms\Components\DateTimePicker::make('pinned_date')
-                    ->label('Pinned Date')
+                    ->label(__('resources.projects.form.pinned_date'))
                     ->native(false)
                     ->displayFormat('d/m/Y H:i')
                     ->visible(fn ($get) => $get('is_pinned'))
@@ -85,16 +90,12 @@ class ProjectResource extends Resource
                             ->prepend('project-file-'),
                     ),
                 Forms\Components\TextInput::make('chat_id')
-                    ->label('Телеграм Чат ID')
-                    ->helperText('Для вашей нужной группы
-Добавьте бота @myidbot и из этой группы
-Вы отправляете команду /getgroupid и получаете ID группы, который нужно указать здесь')
+                    ->label(__('resources.projects.form.chat_id'))
+                    ->helperText(__('resources.projects.form.chat_id_help'))
                     ->maxLength(255),
                 Forms\Components\TextInput::make('thread_id')
-                    ->label('Телеграм Чат Тема ID')
-                    ->helperText('Вы присоединитесь к соответствующей группе Chat ID, указанной выше, и выберите в ней тему, которая вам принадлежит, чтобы скопировать ссылку на любое сообщение, и ссылка будет выглядеть так:
-https://t.me/c/2535102279/3/60 и номер 3 в нем является идентификатором этой темы.
-https://t.me/c/2535102279/Нам нужен ID/60')
+                    ->label(__('resources.projects.form.thread_id'))
+                    ->helperText(__('resources.projects.form.thread_id_help'))
                     ->maxLength(255),
             ]);
     }
@@ -108,7 +109,7 @@ https://t.me/c/2535102279/Нам нужен ID/60')
                 Tables\Columns\TextColumn::make('ticket_prefix')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('progress_percentage')
-                    ->label('Progress')
+                    ->label(__('resources.projects.columns.progress'))
                     ->getStateUsing(function (Project $record): string {
                         return $record->progress_percentage . '%';
                     })
@@ -127,13 +128,13 @@ https://t.me/c/2535102279/Нам нужен ID/60')
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('remaining_days')
-                    ->label('Remaining Days')
+                    ->label(__('resources.projects.columns.remaining_days'))
                     ->getStateUsing(function (Project $record): ?string {
                         if (!$record->end_date) {
                             return null;
                         }
                         
-                        return $record->remaining_days . ' days';
+                        return __('resources.projects.columns.remaining_days_value', ['count' => $record->remaining_days]);
                     })
                     ->badge()
                     ->color(fn (Project $record): string => 
@@ -142,7 +143,7 @@ https://t.me/c/2535102279/Нам нужен ID/60')
                         ($record->remaining_days <= 7 ? 'warning' : 'success'))
                     ),
                 Tables\Columns\ToggleColumn::make('is_pinned')
-                    ->label('Pinned')
+                    ->label(__('resources.projects.columns.pinned'))
                     ->updateStateUsing(function ($record, $state) {
                         // Gunakan method pin/unpin yang sudah ada di model
                         if ($state) {
@@ -154,10 +155,10 @@ https://t.me/c/2535102279/Нам нужен ID/60')
                     }),
                 Tables\Columns\TextColumn::make('members_count')
                     ->counts('members')
-                    ->label('Members'),
+                    ->label(__('resources.projects.columns.members')),
                 Tables\Columns\TextColumn::make('tickets_count')
                     ->counts('tickets')
-                    ->label('Tickets'),
+                    ->label(__('resources.projects.columns.tickets')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

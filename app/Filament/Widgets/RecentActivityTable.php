@@ -12,7 +12,7 @@ class RecentActivityTable extends BaseWidget
 {
     use HasWidgetShield;
 
-    protected static ?string $heading = 'Recent Activities';
+    protected static ?string $heading = null;
     
     protected int | string | array $columnSpan = [
         'md' => 2,
@@ -20,6 +20,11 @@ class RecentActivityTable extends BaseWidget
     ];
     
     protected static ?int $sort = 7;
+
+    protected function getHeading(): ?string
+    {
+        return __('widgets.recent_activity.heading');
+    }
 
     public function table(Table $table): Table
     {
@@ -36,11 +41,11 @@ class RecentActivityTable extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('activity_summary')
-                    ->label('Activity')
+                    ->label(__('widgets.recent_activity.columns.activity'))
                     ->state(function (TicketHistory $record): string {
-                        $ticketName = $record->ticket->name ?? 'Unknown ticket';
+                                $ticketName = $record->ticket->name ?? __('widgets.recent_activity.activity_unknown_ticket');
                         $trimmedName = strlen($ticketName) > 40 ? substr($ticketName, 0, 40) . '...' : $ticketName;
-                        $userName = $record->user->name ?? 'Unknown user';
+                                $userName = $record->user->name ?? __('widgets.recent_activity.activity_unknown_user');
                         return "<span class='text-primary-600 font-medium'>{$userName}</span> changed \"{$trimmedName}\"";
                     })
                     ->description(function (TicketHistory $record): string {
@@ -48,7 +53,7 @@ class RecentActivityTable extends BaseWidget
                         $time = $isToday 
                             ? $record->created_at->format('H:i')
                             : $record->created_at->format('M d, H:i');
-                        $project = $record->ticket->project->name ?? 'No Project';
+                        $project = $record->ticket->project->name ?? __('No Project');
                         $uuid = $record->ticket->uuid ?? '';
                         return "{$time} • {$uuid} • {$project}";
                     })
@@ -56,7 +61,7 @@ class RecentActivityTable extends BaseWidget
                     ->searchable(['users.name', 'tickets.name', 'tickets.uuid'])
                     ->weight('medium'),
                 Tables\Columns\TextColumn::make('status.name')
-                    ->label('Status')
+                    ->label(__('resources.tickets.form.status'))
                     ->badge()
                     ->alignEnd()
                     ->color(fn (TicketHistory $record): string => match($record->status->name ?? '') {
@@ -73,10 +78,10 @@ class RecentActivityTable extends BaseWidget
                 Tables\Filters\Filter::make('date_range')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('start_date')
-                            ->label('Start Date')
+                            ->label(__('resources.tickets.form.start_date'))
                             ->default(today()),
                         \Filament\Forms\Components\DatePicker::make('end_date')
-                            ->label('End Date')
+                            ->label(__('resources.tickets.form.end_date'))
                             ->default(today()),
                     ])
                     ->query(function ($query, array $data) {
@@ -91,16 +96,16 @@ class RecentActivityTable extends BaseWidget
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['start_date'] ?? null) {
-                            $indicators[] = 'From: ' . \Carbon\Carbon::parse($data['start_date'])->format('M d, Y');
+                            $indicators[] = __('widgets.recent_activity.filters.indicator_from', ['date' => \Carbon\Carbon::parse($data['start_date'])->format('M d, Y')]);
                         }
                         if ($data['end_date'] ?? null) {
-                            $indicators[] = 'To: ' . \Carbon\Carbon::parse($data['end_date'])->format('M d, Y');
+                            $indicators[] = __('widgets.recent_activity.filters.indicator_to', ['date' => \Carbon\Carbon::parse($data['end_date'])->format('M d, Y')]);
                         }
                         return $indicators;
                     }),
 
                 Tables\Filters\Filter::make('today')
-                    ->label('Today Only')
+                    ->label(__('Today Only'))
                     ->query(fn ($query) => $query->whereDate('created_at', today()))
                     ->toggle(),
 
@@ -115,7 +120,7 @@ class RecentActivityTable extends BaseWidget
                     ->label('')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->size('sm')
-                    ->tooltip('Open Ticket')
+                    ->tooltip(__('widgets.recent_activity.actions.open_ticket'))
                     ->url(fn (TicketHistory $record): string => 
                         route('filament.admin.resources.tickets.view', $record->ticket)
                     )
@@ -127,8 +132,8 @@ class RecentActivityTable extends BaseWidget
             ->paginated([5, 25, 50])
             ->poll('30s')
             ->striped()
-            ->emptyStateHeading('No Activity Found')
-            ->emptyStateDescription('No ticket activities found for the selected period.')
+            ->emptyStateHeading(__('widgets.recent_activity.empty.heading'))
+            ->emptyStateDescription(__('widgets.recent_activity.empty.description'))
             ->emptyStateIcon('heroicon-o-clock');
     }
 }

@@ -19,11 +19,26 @@ class TicketPriorityResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
 
-    protected static ?string $navigationLabel = 'Ticket Priorities';
+    protected static ?string $navigationLabel = null;
 
-    protected static ?string $pluralLabel = 'Ticket Priorities';
+    protected static ?string $pluralLabel = null;
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resources.ticket_priorities.navigation_label');
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return __('resources.ticket_priorities.navigation_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
 
     public static function form(Form $form): Form
     {
@@ -50,7 +65,7 @@ class TicketPriorityResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tickets_count')
                     ->counts('tickets')
-                    ->label('Tickets Count')
+                    ->label(__('resources.ticket_priorities.columns.tickets_count'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

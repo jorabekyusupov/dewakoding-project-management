@@ -19,9 +19,12 @@ class NotificationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-bell';
     
-    protected static ?string $navigationLabel = 'Notifications';
-    
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('resources.notifications.navigation_label');
+    }
 
     public static function form(Form $form): Form
     {
@@ -46,7 +49,7 @@ class NotificationResource extends Resource
                     
                 // Add user column for super_admin
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
+                    ->label(__('resources.notifications.columns.user'))
                     ->badge()
                     ->color('info')
                     ->searchable()
@@ -57,18 +60,18 @@ class NotificationResource extends Resource
                     ->weight(fn (Notification $record) => $record->isUnread() ? 'bold' : 'normal'),
 
                 Tables\Columns\TextColumn::make('ticket.name')
-                    ->label('Ticket')
+                    ->label(__('resources.notifications.columns.ticket'))
                     ->badge()
                     ->color('primary')
                     ->searchable()
-                    ->placeholder('N/A'),
+                    ->placeholder(__('resources.notifications.placeholder.na')),
                     
                 Tables\Columns\TextColumn::make('ticket.project.name')
-                    ->label('Project')
+                    ->label(__('resources.notifications.columns.project'))
                     ->badge()
                     ->color('success')
                     ->searchable()
-                    ->placeholder('N/A'),
+                    ->placeholder(__('resources.notifications.placeholder.na')),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -77,7 +80,7 @@ class NotificationResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Action::make('markAsRead')
-                    ->label('Mark as Read')
+                    ->label(__('resources.notifications.actions.mark_as_read'))
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn (Notification $record) => $record->isUnread() && (auth()->id() === $record->user_id || auth()->user()->hasRole('super_admin')))
@@ -85,13 +88,13 @@ class NotificationResource extends Resource
                         app(NotificationService::class)->markAsRead($record->id, $record->user_id);
                         
                         FilamentNotification::make()
-                            ->title('Notification marked as read')
+                            ->title(__('resources.notifications.messages.marked_as_read'))
                             ->success()
                             ->send();
                     }),
                     
                 Action::make('viewTicket')
-                    ->label('View Ticket')
+                    ->label(__('resources.notifications.actions.view_ticket'))
                     ->icon('heroicon-o-eye')
                     ->color('primary')
                     ->visible(fn (Notification $record) => isset($record->data['ticket_id']))
@@ -102,7 +105,7 @@ class NotificationResource extends Resource
             ])
             ->headerActions([
                 Action::make('markAllAsRead')
-                    ->label('Mark All as Read')
+                    ->label(__('resources.notifications.actions.mark_all'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn () => !auth()->user()->hasRole('super_admin')) // Only show for non-super_admin
@@ -110,17 +113,18 @@ class NotificationResource extends Resource
                         app(NotificationService::class)->markAllAsRead(auth()->id());
                         
                         FilamentNotification::make()
-                            ->title('All notifications marked as read')
+                            ->title(__('resources.notifications.messages.marked_all'))
                             ->success()
                             ->send();
                     }),
             ])
             ->filters([
                 Tables\Filters\Filter::make('unread')
-                    ->label('Unread Only')
+                    ->label(__('resources.notifications.filters.unread_only'))
                     ->query(fn (Builder $query) => $query->unread()),
                     
                 Tables\Filters\SelectFilter::make('user')
+                    ->label(__('resources.notifications.columns.user'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()

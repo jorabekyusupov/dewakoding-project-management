@@ -13,14 +13,29 @@ class EpicsOverview extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-flag';
     protected static string $view = 'filament.pages.epics-overview';
-    protected static ?string $navigationGroup = 'Project Management';
-    protected static ?string $navigationLabel = 'Epics';
-    protected static ?string $title = 'Epics Overview';
+    protected static ?string $navigationGroup = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
     protected static ?int $navigationSort = 7;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.epics_overview.navigation_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.project_management');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.epics_overview.title');
+    }
 
     public function getSubheading(): ?string
     {
-        return 'Manage and track project epics with their associated tickets and progress';
+        return __('pages.epics_overview.subheading');
     }
 
     protected static ?string $slug = 'epics-overview/{project_id?}';
@@ -41,8 +56,8 @@ class EpicsOverview extends Page
             $this->selectedProjectId = (int) $project_id;
         } elseif ($project_id && !$this->availableProjects->contains('id', $project_id)) {
             Notification::make()
-                ->title('Project Not Found')
-                ->body('The selected project was not found or you do not have access to it.')
+                ->title(__('pages.epics_overview.notifications.project_not_found.title'))
+                ->body(__('pages.epics_overview.notifications.project_not_found.body'))
                 ->danger()
                 ->send();
             $this->redirect(static::getUrl());
@@ -148,7 +163,7 @@ class EpicsOverview extends Page
     public function getTicketAssigneesDisplay($ticket): string
     {
         if ($ticket->assignees->isEmpty()) {
-            return 'Unassigned';
+            return __('pages.epics_overview.unassigned');
         }
 
         $names = $ticket->assignees->pluck('name')->toArray();
@@ -157,7 +172,9 @@ class EpicsOverview extends Page
             return implode(', ', $names);
         }
 
-        return $names[0] . ', ' . $names[1] . ' +' . (count($names) - 2) . ' more';
+        $additional = max(0, count($names) - 2);
+
+        return $names[0] . ', ' . $names[1] . __('pages.epics_overview.assignees_more', ['count' => $additional]);
     }
 
     #[On('epic-created')]
@@ -174,7 +191,7 @@ class EpicsOverview extends Page
         $this->expandedEpics = array_intersect($this->expandedEpics, $currentEpicIds);
 
         Notification::make()
-            ->title('Data refreshed')
+            ->title(__('pages.epics_overview.notifications.data_refreshed'))
             ->success()
             ->send();
     }

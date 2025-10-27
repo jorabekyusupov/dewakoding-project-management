@@ -10,7 +10,7 @@ class UserStatisticsChart extends ChartWidget
 {
     use HasWidgetShield;
     
-    protected static ?string $heading = 'User Statistics Chart';
+    protected static ?string $heading = null;
     
     protected int | string | array $columnSpan = [
         'md' => 2,
@@ -22,8 +22,13 @@ class UserStatisticsChart extends ChartWidget
     protected static ?string $maxHeight = '300px';
     
     protected static ?string $pollingInterval = '30s';
+
+    public function getHeading(): ?string
+    {
+        return __('widgets.user_statistics.heading');
+    }
     
-    protected function getData(): array
+    public function getData(): array
     {
         $users = User::query()
             ->when(!auth()->user()->hasRole('super_admin'), function ($query) {
@@ -43,14 +48,14 @@ class UserStatisticsChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Projects',
+                    'label' => __('widgets.user_statistics.dataset.total_projects'),
                     'data' => $projectsData,
                     'backgroundColor' => '#3B82F6',
                     'borderColor' => '#3B82F6',
                     'borderWidth' => 1,
                 ],
                 [
-                    'label' => 'Total Assigned Tickets',
+                    'label' => __('widgets.user_statistics.dataset.total_assigned_tickets'),
                     'data' => $ticketsData,
                     'backgroundColor' => '#10B981',
                     'borderColor' => '#10B981',
@@ -61,12 +66,12 @@ class UserStatisticsChart extends ChartWidget
         ];
     }
     
-    protected function getType(): string
+    public function getType(): string
     {
         return 'bar';
     }
     
-    protected function getOptions(): array
+    public function getOptions(): array
     {
         return [
             'plugins' => [

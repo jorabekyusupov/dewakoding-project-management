@@ -18,16 +18,31 @@ class UserContributions extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar-square';
-    protected static ?string $navigationLabel = 'User Contributions';
-    protected static ?string $title = 'User Contributions';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
     protected static ?int $navigationSort = 5;
     protected static string $view = 'filament.pages.user-contributions';
-    protected static ?string $navigationGroup = 'Analytics';
+    protected static ?string $navigationGroup = null;
     protected static ?string $slug = 'user-contributions';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.user_contributions.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.user_contributions.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.analytics');
+    }
 
     public function getSubheading(): ?string
     {
-        return 'Track daily activity and contributions across the team';
+        return __('pages.user_contributions.subheading');
     }
     public Collection $users;
     public ?string $selectedUserId = null;
@@ -256,11 +271,11 @@ class UserContributions extends Page implements HasForms
     public function getTimeRangeLabel(): string
     {
         return match($this->timeRange) {
-            '1month' => 'Last Month',
-            '3months' => 'Last 3 Months',
-            '6months' => 'Last 6 Months',
-            '1year' => 'Last Year',
-            default => 'Last 3 Months'
+            '1month' => __('pages.user_contributions.time_range.1month'),
+            '3months' => __('pages.user_contributions.time_range.3months'),
+            '6months' => __('pages.user_contributions.time_range.6months'),
+            '1year' => __('pages.user_contributions.time_range.1year'),
+            default => __('pages.user_contributions.time_range.default'),
         };
     }
 }

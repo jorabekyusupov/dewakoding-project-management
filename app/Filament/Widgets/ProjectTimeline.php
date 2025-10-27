@@ -181,20 +181,20 @@ class ProjectTimeline extends Widget
                 $progressPercent = ($pastDays / $totalDays) * 100;
             }
             
-            $status = 'In Progress';
+            $status = __('pages.project_timeline.status.in_progress');
             $statusColor = 'blue';
             
             if ($today->gt($endDate)) {
-                $status = 'Completed';
+                $status = __('pages.project_timeline.status.completed');
                 $statusColor = 'green';
             } elseif ($project->remaining_days <= 0) {
-                $status = 'Overdue';
+                $status = __('pages.project_timeline.status.overdue');
                 $statusColor = 'red';
             } elseif ($project->remaining_days <= 7) {
-                $status = 'Approaching Deadline';
+                $status = __('pages.project_timeline.status.approaching_deadline');
                 $statusColor = 'yellow';
             } elseif ($today->lt($startDate)) {
-                $status = 'Not Started';
+                $status = __('widgets.project_timeline.status.not_started');
                 $statusColor = 'gray';
             }
             
@@ -238,8 +238,8 @@ class ProjectTimeline extends Widget
                         'name' => $ticket->name,
                         'due_date' => $dueDate->format('d/m/Y'),
                         'due_percent' => max(0, min(100, $duePercent)),
-                        'status' => $ticket->status?->name ?? 'No Status',
-                        'priority' => $ticket->priority?->name ?? 'No Priority',
+                        'status' => $ticket->status?->name ?? __('widgets.project_timeline.no_status'),
+                        'priority' => $ticket->priority?->name ?? __('resources.tickets.placeholders.no_priority'),
                         'assignees' => $ticket->assignees->pluck('name')->join(', '),
                         'is_overdue' => $dueDate->isPast(),
                     ];

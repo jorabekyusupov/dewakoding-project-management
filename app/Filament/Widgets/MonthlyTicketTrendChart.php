@@ -12,7 +12,7 @@ class MonthlyTicketTrendChart extends ChartWidget
 {
     use HasWidgetShield;
 
-    protected static ?string $heading = 'Monthly Ticket Creation Trend';
+    protected static ?string $heading = null;
 
     protected static ?int $sort = 4;
 
@@ -25,7 +25,12 @@ class MonthlyTicketTrendChart extends ChartWidget
 
     protected static ?string $pollingInterval = '60s';
 
-    protected function getData(): array
+    public function getHeading(): ?string
+    {
+        return __('widgets.monthly_ticket_trend.heading');
+    }
+
+    public function getData(): array
     {
         $user = auth()->user();
         $isSuperAdmin = $user->hasRole('super_admin');
@@ -102,7 +107,7 @@ class MonthlyTicketTrendChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Tickets Created',
+                    'label' => __('widgets.monthly_ticket_trend.dataset.tickets_created'),
                     'data' => $data,
                     'borderColor' => '#3B82F6',
                     'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
@@ -115,12 +120,12 @@ class MonthlyTicketTrendChart extends ChartWidget
         ];
     }
 
-    protected function getType(): string
+    public function getType(): string
     {
         return 'line';
     }
 
-    protected function getOptions(): array
+    public function getOptions(): array
     {
         return [
             'plugins' => [

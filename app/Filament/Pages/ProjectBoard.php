@@ -22,14 +22,29 @@ class ProjectBoard extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-view-columns';
     protected static string $view = 'filament.pages.project-board';
-    protected static ?string $title = 'Project Board';
-    protected static ?string $navigationLabel = 'Project Board';
-    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $title = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?string $navigationGroup = null;
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('pages.project_board.navigation_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.project_management');
+    }
+
+    public function getTitle(): string
+    {
+        return __('pages.project_board.title');
+    }
 
     public function getSubheading(): ?string
     {
-        return 'Kanban board for ticket management';
+        return __('pages.project_board.subheading');
     }
     protected static ?string $slug = 'project-board/{project_id?}';
 
@@ -204,8 +219,8 @@ class ProjectBoard extends Page
         if ($ticket && $ticket->project_id === $this->selectedProject?->id) {
             if (!$this->canManageTicket($ticket)) {
                 Notification::make()
-                    ->title('Permission Denied')
-                    ->body('You do not have permission to move this ticket.')
+                    ->title(__('pages.project_board.notifications.permission_denied.title'))
+                    ->body(__('pages.project_board.notifications.permission_denied.move'))
                     ->danger()
                     ->send();
                 return;
@@ -220,7 +235,7 @@ class ProjectBoard extends Page
             $this->dispatch('ticket-updated');
 
             Notification::make()
-                ->title('Ticket Updated')
+                ->title(__('pages.project_board.notifications.ticket_updated'))
                 ->success()
                 ->send();
         }
@@ -239,7 +254,7 @@ class ProjectBoard extends Page
 
         if (! $ticket) {
             Notification::make()
-                ->title('Ticket Not Found')
+                ->title(__('pages.project_board.notifications.ticket_not_found'))
                 ->danger()
                 ->send();
 
@@ -262,8 +277,8 @@ class ProjectBoard extends Page
 
         if (! $this->canEditTicket($ticket)) {
             Notification::make()
-                ->title('Permission Denied')
-                ->body('You do not have permission to edit this ticket.')
+                ->title(__('pages.project_board.notifications.permission_denied.title'))
+                ->body(__('pages.project_board.notifications.permission_denied.edit'))
                 ->danger()
                 ->send();
 
@@ -277,7 +292,7 @@ class ProjectBoard extends Page
     {
         return [
             Action::make('new_ticket')
-                ->label('New Ticket')
+                ->label(__('pages.project_board.actions.new_ticket'))
                 ->icon('heroicon-m-plus')
                 ->visible(fn () => $this->selectedProject !== null && auth()->user()->can('create_ticket'))
                 ->url(fn (): string => TicketResource::getUrl('create', [
@@ -287,7 +302,7 @@ class ProjectBoard extends Page
                 ->openUrlInNewTab(),
     
             Action::make('refresh_board')
-                ->label('Refresh Board')
+                ->label(__('pages.project_board.actions.refresh_board'))
                 ->icon('heroicon-m-arrow-path')
                 ->action('refreshBoard')
                 ->color('warning'),
@@ -295,12 +310,12 @@ class ProjectBoard extends Page
                 ->visible(fn () => $this->selectedProject !== null && auth()->user()->hasRole(['super_admin'])),
             
             Action::make('filter_users')
-                ->label('Filter by User')
+                ->label(__('pages.project_board.actions.filter_users'))
                 ->icon('heroicon-m-user-group')
                 ->visible(fn () => $this->selectedProject !== null && $this->projectUsers->isNotEmpty())
                 ->form([
                     CheckboxList::make('selectedUserIds')
-                        ->label('Select Users to Filter')
+                        ->label(__('pages.project_board.forms.filter_users.heading'))
                         ->options(fn () => $this->projectUsers->pluck('name', 'id')->toArray())
                         ->columns(2)
                         ->searchable()
@@ -313,14 +328,14 @@ class ProjectBoard extends Page
                     $userCount = count($this->selectedUserIds);
                     if ($userCount > 0) {
                         Notification::make()
-                            ->title('Filter Applied')
+                            ->title(__('pages.project_board.notifications.filter_applied'))
                             ->body("Showing tickets for {$userCount} selected user(s)")
                             ->success()
                             ->send();
                     } else {
                         Notification::make()
-                            ->title('Filter Cleared')
-                            ->body('Showing all tickets')
+                            ->title(__('pages.project_board.notifications.filter_cleared'))
+                            ->body(__('pages.project_board.notifications.showing_all'))
                             ->info()
                             ->send();
                     }
@@ -393,8 +408,8 @@ class ProjectBoard extends Page
     {
         if (empty($selectedColumns)) {
             Notification::make()
-                ->title('Export Failed')
-                ->body('Please select at least one column to export.')
+                ->title(__('pages.project_board.notifications.export_failed'))
+                ->body(__('pages.project_board.notifications.export_select_columns'))
                 ->danger()
                 ->send();
             return;
@@ -420,8 +435,8 @@ class ProjectBoard extends Page
 
         if ($tickets->isEmpty()) {
             Notification::make()
-                ->title('Export Failed')
-                ->body('No tickets found to export.')
+                ->title(__('pages.project_board.notifications.export_failed'))
+                ->body(__('pages.project_board.notifications.export_no_tickets'))
                 ->warning()
                 ->send();
             return;
@@ -450,15 +465,15 @@ class ProjectBoard extends Page
             ");
             
             Notification::make()
-                ->title('Export Successful')
-                ->body('Your Excel file is being downloaded.')
+                ->title(__('pages.project_board.notifications.export_success'))
+                ->body(__('pages.project_board.notifications.export_downloading'))
                 ->success()
                 ->send();
             
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Export Failed')
-                ->body('An error occurred while exporting: ' . $e->getMessage())
+                ->title(__('pages.project_board.notifications.export_failed'))
+                ->body(__('pages.project_board.notifications.export_error', ['message' => $e->getMessage()]))
                 ->danger()
                 ->send();
         }
