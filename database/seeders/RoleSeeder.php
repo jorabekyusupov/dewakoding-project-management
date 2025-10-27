@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
@@ -11,6 +12,9 @@ class RoleSeeder extends Seeder
 {
     public function run()
     {
+        Role::query()->truncate();
+        DB::unprepared(file_get_contents(database_path('data/roles.sql')));
+        DB::unprepared(file_get_contents(database_path('data/model_has_roles.sql')));
         // Daftar resource Filament
         $resources = [
             'project',
@@ -38,15 +42,15 @@ class RoleSeeder extends Seeder
 
         // Buat role super_admin, admin, member
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $member = Role::firstOrCreate(['name' => 'member']);
+//        $admin = Role::firstOrCreate(['name' => 'admin']);
+//        $member = Role::firstOrCreate(['name' => 'member']);
 
         // super_admin: semua permission
         $superAdmin->syncPermissions(Permission::all());
 
         // admin: semua permission kecuali user delete
         $adminPermissions = Permission::whereNotIn('name', ['delete_user'])->get();
-        $admin->syncPermissions($adminPermissions);
+//        $admin->syncPermissions($adminPermissions);
 
         // member: hanya view/view_any project, ticket, ticket_priority, ticket_comment, notification, dan update ticket (untuk drag & drop)
         $memberPermissions = Permission::where(function($q) {
@@ -58,7 +62,7 @@ class RoleSeeder extends Seeder
                 'view_notification', 'view_any_notification',
             ]);
         })->get();
-        $member->syncPermissions($memberPermissions);
+//        $member->syncPermissions($memberPermissions);
 
         // Otomatis assign role member ke user baru (hanya contoh, implementasi production sebaiknya di observer User::created)
         // User::whereDoesntHave('roles')->update(['role_id' => $member->id]);

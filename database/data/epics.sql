@@ -1,0 +1,8 @@
+insert into epics ( project_id, name, description, start_date, end_date, created_at, updated_at)
+values  ( 2, 'Раздел №1 «Расчёт и начисление пенсии»', null, '2024-11-01', null, '2025-07-17 11:02:24', '2025-07-17 11:02:24'),
+        ( 2, 'Раздел № 2 «Учёт пенсионеров»', null, null, null, '2025-07-17 11:02:37', '2025-07-17 11:02:37'),
+        ( 4, 'формирование справочников ', null, '2025-07-21', '2025-08-01', '2025-07-22 17:23:32', '2025-07-22 17:23:32'),
+        ( 4, 'Карточка документа ', '<p>&nbsp;| document_type_id<br>&nbsp;| document_date<br>&nbsp;| short_description<br>&nbsp;| file_path<br>&nbsp;| reg_number<br>&nbsp;| sender_name<br>&nbsp;| recipient_name<br>&nbsp;| delivery_channel_id<br>&nbsp;| pages_count<br>&nbsp;| confidentiality_grade_id<br>&nbsp;| author_unit_id<br>&nbsp;| author_user_id<br>&nbsp;| phone_number<br>&nbsp;| execution_deadline<br>&nbsp;| notes<br>&nbsp;| linked_document_id<br>&nbsp;| status&nbsp; &nbsp; полное описание по карточке документа в файле прикреплённом&nbsp;</p>', '2025-07-28', null, '2025-07-28 14:58:16', '2025-07-28 14:58:52'),
+        ( 9, 'Разработка базовых функционалов', null, '2025-09-15', '2025-09-19', '2025-09-10 15:49:43', '2025-09-10 15:49:43'),
+        ( 9, 'Разработка справочников', null, '2025-09-22', '2025-09-26', '2025-09-10 15:51:05', '2025-09-10 15:51:05'),
+        ( 9, 'Этап 1: Заявления, поступающие через государственные услуги и заявления военнослужащих', null, '2025-10-01', '2025-11-01', '2025-10-11 23:07:22', '2025-10-11 23:07:22');

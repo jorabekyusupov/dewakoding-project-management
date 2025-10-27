@@ -69,7 +69,7 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsToMany(Ticket::class, 'ticket_users');
     }
 
-     public function createdTickets(): HasMany
+    public function createdTickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'created_by');
     }
@@ -102,6 +102,7 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         $roles = Roles::all()->pluck('name')->toArray();
+
         return $this->hasAnyRole($roles);
     }
 }
