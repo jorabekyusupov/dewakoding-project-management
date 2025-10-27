@@ -12,11 +12,11 @@ class ProjectSeeder extends Seeder
         DB::unprepared(file_get_contents(database_path('data/projects.sql')));
         DB::unprepared(file_get_contents(database_path('data/project_members.sql')));
         DB::unprepared(file_get_contents(database_path('data/epics.sql')));
-//        DB::unprepared(file_get_contents(database_path('data/ticket_statuses.sql')));
-//        DB::unprepared(file_get_contents(database_path('data/tickets.sql')));
-//        DB::unprepared(file_get_contents(database_path('data/ticket_users.sql')));
-//        DB::unprepared(file_get_contents(database_path('data/ticket_comments.sql')));
-//        DB::unprepared(file_get_contents(database_path('data/ticket_priorities.sql')));
+        DB::unprepared(file_get_contents(database_path('data/ticket_statuses.sql')));
+        DB::unprepared(file_get_contents(database_path('data/tickets.sql')));
+        DB::unprepared(file_get_contents(database_path('data/ticket_users.sql')));
+        DB::unprepared(file_get_contents(database_path('data/ticket_comments.sql')));
+        DB::unprepared(file_get_contents(database_path('data/ticket_priorities.sql')));
 
     }
 }
