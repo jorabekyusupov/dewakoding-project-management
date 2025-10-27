@@ -4,7 +4,7 @@
             <!-- Header dengan Filter -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <x-filament::section.heading>
-                    Project Timeline
+                    {{ __('widgets.project_timeline.heading') }}
                 </x-filament::section.heading>
                 
                 <!-- Filter Buttons -->
@@ -15,7 +15,7 @@
                         :outlined="$filter !== 'pinned'"
                         size="sm"
                     >
-                        Pinned Projects
+                        {{ __('widgets.project_timeline.filters.pinned') }}
                         <x-filament::badge
                             :color="$filter === 'pinned' ? 'primary' : 'gray'"
                             size="sm"
@@ -31,7 +31,7 @@
                         :outlined="$filter !== 'all'"
                         size="sm"
                     >
-                        All Projects
+                        {{ __('widgets.project_timeline.filters.all') }}
                         <x-filament::badge
                             :color="$filter === 'all' ? 'primary' : 'gray'"
                             size="sm"
@@ -52,17 +52,17 @@
                     
                     <h3 class="mt-4 text-sm font-medium text-gray-900 dark:text-white">
                         @if($filter === 'pinned')
-                            No pinned projects
+                            {{ __('widgets.project_timeline.empty.pinned.title') }}
                         @else
-                            No projects found
+                            {{ __('widgets.project_timeline.empty.all.title') }}
                         @endif
                     </h3>
                     
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-center max-w-sm">
                         @if($filter === 'pinned')
-                            You haven't pinned any projects yet. Pin important projects to keep them easily accessible.
+                            {{ __('widgets.project_timeline.empty.pinned.description') }}
                         @else
-                            Create a new project or check your project permissions.
+                            {{ __('widgets.project_timeline.empty.all.description') }}
                         @endif
                     </p>
                 </div>
@@ -87,10 +87,14 @@
                                                 'Not Started' => 'gray',
                                                 default => 'gray'
                                             };
+                                            default => 'gray'
+                                        };
+
+                                        $statusKey = Str::of($project['status'])->lower()->replace(' ', '_')->replace('-', '_');
                                         @endphp
                                         
                                         <x-filament::badge :color="$badgeColor" size="sm">
-                                            {{ $project['status'] }}
+                                            {{ __('pages.project_timeline.status.' . $statusKey) }}
                                         </x-filament::badge>
                                     </div>
                                 </div>
@@ -100,7 +104,7 @@
                                         {{ $project['start_date'] }} - {{ $project['end_date'] }}
                                     </div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {{ $project['total_days'] }} total days
+                                        {{ trans_choice('widgets.project_timeline.total_days', $project['total_days'], ['count' => $project['total_days']]) }}
                                     </div>
                                 </div>
                             </div>
@@ -124,8 +128,7 @@
                                     <div class="flex items-center gap-4">
                                         @if($project['past_days'] > 0)
                                             <div class="text-gray-600 dark:text-gray-400">
-                                                <span class="font-medium">{{ $project['past_days'] }}</span>
-                                                {{ Str::plural('day', $project['past_days']) }} completed
+                                                {!! trans_choice('widgets.project_timeline.progress.completed', $project['past_days'], ['count' => '<span class="font-medium">' . $project['past_days'] . '</span>']) !!}
                                             </div>
                                         @endif
                                     </div>
@@ -133,15 +136,15 @@
                                     <div class="text-right">
                                         @if($project['remaining_days'] > 0)
                                             <div class="font-medium text-gray-900 dark:text-white">
-                                                {{ $project['remaining_days'] }} {{ Str::plural('day', $project['remaining_days']) }} remaining
+                                                {!! trans_choice('widgets.project_timeline.progress.remaining', $project['remaining_days'], ['count' => '<span class="font-medium">' . $project['remaining_days'] . '</span>']) !!}
                                             </div>
                                         @elseif($project['remaining_days'] < 0)
                                             <div class="font-medium text-red-600 dark:text-red-400">
-                                                {{ abs($project['remaining_days']) }} {{ Str::plural('day', abs($project['remaining_days'])) }} overdue
+                                                {!! trans_choice('widgets.project_timeline.progress.overdue', abs($project['remaining_days']), ['count' => '<span class="font-medium">' . abs($project['remaining_days']) . '</span>']) !!}
                                             </div>
                                         @else
                                             <div class="font-medium text-amber-600 dark:text-amber-400">
-                                                Due today
+                                                {{ __('widgets.project_timeline.progress.due_today') }}
                                             </div>
                                         @endif
                                     </div>

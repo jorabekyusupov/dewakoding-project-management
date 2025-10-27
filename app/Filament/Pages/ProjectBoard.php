@@ -33,10 +33,10 @@ class ProjectBoard extends Page
         return __('pages.project_board.navigation_label');
     }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('navigation.project_management');
-    }
+//    public static function getNavigationGroup(): ?string
+//    {
+//        return __('navigation.project_management');
+//    }
 
     public function getTitle(): string
     {

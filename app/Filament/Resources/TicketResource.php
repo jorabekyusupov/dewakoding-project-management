@@ -35,20 +35,29 @@ class TicketResource extends Resource
         return __('resources.tickets.navigation_label');
     }
 
-    public static function getNavigationGroup(): ?string
+
+    /**
+     * @return string|null
+     */
+    public static function getPluralLabel(): ?string
     {
-        return __('navigation.project_management');
+        return __('tickets');
+    }
+
+    public static function getLabel(): ?string
+    {
+        return __('ticket');
     }
 
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        if (! auth()->user()->hasRole(['super_admin'])) {
+        if (!auth()->user()->hasRole(['super_admin'])) {
             $query->where(function ($query) {
                 $query->whereHas('assignees', function ($query) {
-                        $query->where('users.id', auth()->id());
-                    })
+                    $query->where('users.id', auth()->id());
+                })
                     ->orWhere('created_by', auth()->id())
                     ->orWhereHas('project.members', function ($query) {
                         $query->where('users.id', auth()->id());
@@ -90,7 +99,7 @@ class TicketResource extends Resource
                     ->label(__('resources.tickets.form.status'))
                     ->options(function ($get) {
                         $projectId = $get('project_id');
-                        if (! $projectId) {
+                        if (!$projectId) {
                             return [];
                         }
 
@@ -114,11 +123,11 @@ class TicketResource extends Resource
                     ->label(__('resources.tickets.form.epic'))
                     ->options(function (callable $get) {
                         $projectId = $get('project_id');
-                        
+
                         if (!$projectId) {
                             return [];
                         }
-                        
+
                         return Epic::where('project_id', $projectId)
                             ->pluck('name', 'id')
                             ->toArray();
@@ -126,7 +135,7 @@ class TicketResource extends Resource
                     ->searchable()
                     ->preload()
                     ->nullable()
-                    ->hidden(fn (callable $get): bool => !$get('project_id')),
+                    ->hidden(fn(callable $get): bool => !$get('project_id')),
 
                 Forms\Components\TextInput::make('name')
                     ->label(__('resources.tickets.form.name'))
@@ -155,12 +164,12 @@ class TicketResource extends Resource
                         titleAttribute: 'name',
                         modifyQueryUsing: function (Builder $query, callable $get) {
                             $projectId = $get('project_id');
-                            if (! $projectId) {
+                            if (!$projectId) {
                                 return $query->whereRaw('1 = 0');
                             }
 
                             $project = Project::find($projectId);
-                            if (! $project) {
+                            if (!$project) {
                                 return $query->whereRaw('1 = 0');
                             }
 
@@ -172,14 +181,14 @@ class TicketResource extends Resource
                     ->searchable()
                     ->preload()
                     ->helperText(__('resources.tickets.form.assignees_help'))
-                    ->hidden(fn (callable $get): bool => !$get('project_id'))
+                    ->hidden(fn(callable $get): bool => !$get('project_id'))
                     ->live(),
-                
+
                 Forms\Components\DatePicker::make('start_date')
                     ->label(__('resources.tickets.form.start_date'))
                     ->default(now())
                     ->nullable(),
-                
+
                 Forms\Components\DatePicker::make('due_date')
                     ->label(__('resources.tickets.form.due_date'))
                     ->nullable(),
@@ -218,7 +227,7 @@ class TicketResource extends Resource
                 Tables\Columns\TextColumn::make('priority.name')
                     ->label(__('resources.tickets.form.priority'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'High' => 'danger',
                         'Medium' => 'warning',
                         'Low' => 'success',
@@ -252,7 +261,7 @@ class TicketResource extends Resource
                     ->label(__('resources.tickets.form.due_date'))
                     ->date()
                     ->sortable(),
-                    
+
                 Tables\Columns\TextColumn::make('epic.name')
                     ->label(__('resources.tickets.form.epic'))
                     ->sortable()
@@ -272,37 +281,37 @@ class TicketResource extends Resource
                         if (auth()->user()->hasRole(['super_admin'])) {
                             return Project::pluck('name', 'id')->toArray();
                         }
-            
+
                         return auth()->user()->projects()->pluck('name', 'projects.id')->toArray();
                     })
                     ->searchable()
                     ->preload(),
-            
+
                 Tables\Filters\SelectFilter::make('ticket_status_id')
                     ->label(__('resources.tickets.form.status'))
                     ->options(function () {
                         $projectId = request()->input('tableFilters.project_id');
-                        
+
                         if (!$projectId) {
                             return [];
                         }
-                        
+
                         return TicketStatus::where('project_id', $projectId)
                             ->pluck('name', 'id')
                             ->toArray();
                     })
                     ->searchable()
                     ->preload(),
-                    
+
                 Tables\Filters\SelectFilter::make('epic_id')
                     ->label(__('resources.tickets.form.epic'))
                     ->options(function () {
                         $projectId = request()->input('tableFilters.project_id');
-                        
+
                         if (!$projectId) {
                             return [];
                         }
-                        
+
                         return Epic::where('project_id', $projectId)
                             ->pluck('name', 'id')
                             ->toArray();
@@ -330,7 +339,7 @@ class TicketResource extends Resource
                     ->relationship('creator', 'name')
                     ->searchable()
                     ->preload(),
-            
+
                 Tables\Filters\Filter::make('due_date')
                     ->form([
                         Forms\Components\DatePicker::make('due_from'),
@@ -340,11 +349,11 @@ class TicketResource extends Resource
                         return $query
                             ->when(
                                 $data['due_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('due_date', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('due_date', '>=', $date),
                             )
                             ->when(
                                 $data['due_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('due_date', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('due_date', '<=', $date),
                             );
                     }),
             ])

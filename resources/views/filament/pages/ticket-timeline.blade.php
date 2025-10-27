@@ -6,14 +6,14 @@
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                     <div class="flex-1">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ $selectedProject ? $selectedProject->name : 'Select Project' }}
+                            {{ $selectedProject ? $selectedProject->name : __('pages.shared.select_project') }}
                         </h2>
                     </div>
 
                     <div class="w-full lg:w-auto">
                         <x-filament::input.wrapper>
                             <x-filament::input.select wire:model.live="projectId" class="w-full lg:min-w-[200px]">
-                                <option value="">Select Project</option>
+                                <option value="">{{ __('pages.shared.select_project') }}</option>
                                 @foreach ($projects as $project)
                                     <option value="{{ $project->id }}"
                                         {{ $projectId == $project->id ? 'selected' : '' }}>
@@ -32,7 +32,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Ticket Timeline</h2>
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('pages.ticket_timeline.title') }}</h2>
                         <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -40,7 +40,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <span>Read Only View</span>
+                            <span>{{ __('pages.ticket_timeline.read_only') }}</span>
                         </div>
                     </div>
                 </div>
@@ -55,8 +55,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                             </svg>
-                            <h3 class="text-lg font-medium">No tickets with due dates</h3>
-                            <p class="text-sm">Add due dates to tickets to see the timeline</p>
+                            <h3 class="text-lg font-medium">{{ __('pages.ticket_timeline.empty.title') }}</h3>
+                            <p class="text-sm">{{ __('pages.ticket_timeline.empty.description') }}</p>
                         </div>
                     @endif
                 </div>
@@ -67,8 +67,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                 </svg>
-                <h2 class="text-xl font-medium">Please select a project</h2>
-                <p class="text-sm">Choose a project from the dropdown to view the timeline</p>
+                <h2 class="text-xl font-medium">{{ __('pages.ticket_timeline.no_project.title') }}</h2>
+                <p class="text-sm">{{ __('pages.ticket_timeline.no_project.description') }}</p>
             </div>
         @endif
     </div>
@@ -105,6 +105,63 @@
                 currentProjectId: '{{ $projectId }}'
             };
 
+            const ticketTimelineTranslations = @js([
+                'columns' => [
+                    'task' => __('pages.ticket_timeline.columns.task'),
+                    'status' => __('pages.ticket_timeline.columns.status'),
+                    'duration' => __('pages.ticket_timeline.columns.duration'),
+                ],
+                'tooltip' => [
+                    'task' => __('pages.ticket_timeline.tooltip.task'),
+                    'status' => __('pages.ticket_timeline.tooltip.status'),
+                    'duration' => __('pages.ticket_timeline.tooltip.duration'),
+                    'progress' => __('pages.ticket_timeline.tooltip.progress'),
+                    'start' => __('pages.ticket_timeline.tooltip.start'),
+                    'end' => __('pages.ticket_timeline.tooltip.end'),
+                    'overdue' => __('pages.ticket_timeline.tooltip.overdue'),
+                ],
+                'today' => __('pages.ticket_timeline.today'),
+                'errors' => [
+                    'title' => __('pages.ticket_timeline.error.title'),
+                    'description' => __('pages.ticket_timeline.error.description'),
+                    'label' => __('pages.ticket_timeline.error.label'),
+                    'refresh' => __('pages.ticket_timeline.error.refresh'),
+                    'library' => __('pages.ticket_timeline.error.library'),
+                    'container' => __('pages.ticket_timeline.error.container'),
+                ],
+                'units' => [
+                    'day' => [
+                        'one' => __('pages.shared.units.day.one'),
+                        'few' => __('pages.shared.units.day.few'),
+                        'many' => __('pages.shared.units.day.many'),
+                        'other' => __('pages.shared.units.day.other'),
+                    ],
+                ],
+            ]);
+
+            function formatRussianPlural(count, forms) {
+                const mod10 = count % 10;
+                const mod100 = count % 100;
+
+                if (mod10 === 1 && mod100 !== 11) {
+                    return forms.one;
+                }
+
+                if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+                    return forms.few;
+                }
+
+                if (mod10 === 0 || (mod10 >= 5 && mod10 <= 9) || (mod100 >= 11 && mod100 <= 14)) {
+                    return forms.many;
+                }
+
+                return forms.other;
+            }
+
+            function formatDays(count) {
+                return formatRussianPlural(count, ticketTimelineTranslations.units.day);
+            }
+
             function getGanttData() {
                 return @json($this->ganttData ?? ['data' => [], 'links' => []]);
             }
@@ -120,7 +177,7 @@
                         setTimeout(check, 100);
                     } else {
                         console.error('dhtmlxGantt failed to load after', maxAttempts * 100, 'ms');
-                        showErrorMessage('Failed to load Gantt library');
+                        showErrorMessage(ticketTimelineTranslations.errors.library);
                     }
                 }
                 check();
@@ -138,13 +195,13 @@
                         setTimeout(check, 100);
                     } else {
                         console.error('Gantt container not found or not visible after', maxAttempts * 100, 'ms');
-                        showErrorMessage('Gantt container not available');
+                        showErrorMessage(ticketTimelineTranslations.errors.container);
                     }
                 }
                 check();
             }
 
-            function showErrorMessage(message = 'Error loading timeline') {
+            function showErrorMessage(message = ticketTimelineTranslations.errors.title, detail = '') {
                 const container = document.getElementById('gantt_here');
                 if (container) {
                     container.innerHTML = `
@@ -153,9 +210,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <h3 class="text-lg font-medium">${message}</h3>
-                            <p class="text-sm">Please refresh the page or contact support</p>
+                            <p class="text-sm">${ticketTimelineTranslations.errors.description}</p>
+                            ${detail ? `<p class="text-xs text-gray-400">${ticketTimelineTranslations.errors.label} ${detail}</p>` : ''}
                             <button onclick="location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                                Refresh Page
+                                ${ticketTimelineTranslations.errors.refresh}
                             </button>
                         </div>
                     `;
@@ -267,21 +325,22 @@
                         gantt.config.task_height = 32;
                         gantt.config.bar_height = 24;
 
-                        gantt.config.columns = [{
+                        gantt.config.columns = [
+                            {
                                 name: "text",
-                                label: "Task Name",
+                                label: ticketTimelineTranslations.columns.task,
                                 width: 200,
                                 tree: true
                             },
                             {
                                 name: "status",
-                                label: "Status",
+                                label: ticketTimelineTranslations.columns.status,
                                 width: 100,
                                 align: "center"
                             },
                             {
                                 name: "duration",
-                                label: "Duration",
+                                label: ticketTimelineTranslations.columns.duration,
                                 width: 50,
                                 align: "center"
                             }
@@ -292,13 +351,15 @@
                         };
 
                         gantt.templates.tooltip_text = function(start, end, task) {
-                            return `<b>Task:</b> ${task.text}<br/>
-                                    <b>Status:</b> ${task.status}<br/>
-                                    <b>Duration:</b> ${task.duration} day(s)<br/>
-                                    <b>Progress:</b> ${Math.round(task.progress * 100)}%<br/>
-                                    <b>Start:</b> ${gantt.templates.tooltip_date_format(start)}<br/>
-                                    <b>End:</b> ${gantt.templates.tooltip_date_format(end)}
-                                    ${task.is_overdue ? '<br/><b style="color: #ef4444;">⚠️ OVERDUE</b>' : ''}`;
+                            const daysLabel = formatDays(task.duration);
+
+                            return `<b>${ticketTimelineTranslations.tooltip.task}</b> ${task.text}<br/>
+                                    <b>${ticketTimelineTranslations.tooltip.status}</b> ${task.status}<br/>
+                                    <b>${ticketTimelineTranslations.tooltip.duration}</b> ${task.duration} ${daysLabel}<br/>
+                                    <b>${ticketTimelineTranslations.tooltip.progress}</b> ${Math.round(task.progress * 100)}%<br/>
+                                    <b>${ticketTimelineTranslations.tooltip.start}</b> ${gantt.templates.tooltip_date_format(start)}<br/>
+                                    <b>${ticketTimelineTranslations.tooltip.end}</b> ${gantt.templates.tooltip_date_format(end)}
+                                    ${task.is_overdue ? `<br/><b style="color: #ef4444;">${ticketTimelineTranslations.tooltip.overdue}</b>` : ''}`;
                         };
                     } catch (configError) {
                         console.error('Error configuring gantt:', configError);
@@ -364,7 +425,7 @@
                         gantt.addMarker({
                             start_date: today,
                             css: "today",
-                            text: "Today"
+                            text: ticketTimelineTranslations.today
                         });
 
                         console.log('dhtmlxGantt initialized successfully with', processedData.data.length,
@@ -377,7 +438,7 @@
 
                 } catch (error) {
                     console.error('Error initializing dhtmlxGantt:', error);
-                    showErrorMessage(error.message || 'Error loading timeline');
+                    showErrorMessage(ticketTimelineTranslations.errors.title, error.message || '');
                 }
             }
         </script>

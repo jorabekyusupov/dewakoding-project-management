@@ -4,7 +4,7 @@
         <x-filament::section>
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                    {{ $selectedProjectId ? $availableProjects->firstWhere('id', $selectedProjectId)?->name : 'Select Project' }}
+                    {{ $selectedProjectId ? $availableProjects->firstWhere('id', $selectedProjectId)?->name : __('pages.shared.select_project') }}
                 </h2>
                 
                 <div class="w-full sm:w-auto">
@@ -13,7 +13,7 @@
                             wire:model.live="selectedProjectId"
                             class="w-full"
                         >
-                            <option value="">Select Project</option>
+                            <option value="">{{ __('pages.shared.select_project') }}</option>
                             @foreach($availableProjects as $project)
                                 <option value="{{ $project->id }}" {{ $selectedProjectId == $project->id ? 'selected' : '' }}>
                                     {{ $project->name }}
@@ -29,7 +29,7 @@
     @if($selectedProjectId && $epics->isNotEmpty())
         <x-filament::section>
             <x-slot name="heading">
-                Epics Overview
+                {{ __('pages.epics_overview.title') }}
             </x-slot>
             
             <div class="w-full space-y-3">
@@ -50,7 +50,7 @@
                             </div>
                             <div class="flex items-center space-x-4">
                                 <div class="bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-300 text-sm rounded-full px-3 py-1">
-                                    {{ $epic->tickets->count() }} tickets
+                                    {{ trans_choice('pages.epics_overview.ticket_count', $epic->tickets->count(), ['count' => $epic->tickets->count()]) }}
                                 </div>
                                 <button class="text-gray-400 hover:text-primary-500 focus:outline-none">
                                     @if($this->isExpanded($epic->id))
@@ -68,7 +68,7 @@
                                 <!-- Epic Description -->
                                 @if($epic->description)
                                     <div class="mb-4">
-                                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">Description</h4>
+                                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">{{ __('pages.epics_overview.description') }}</h4>
                                         <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-md text-sm text-gray-900 dark:text-gray-300">
                                             {!! $epic->description !!}
                                         </div>
@@ -78,29 +78,29 @@
                                 <!-- Tickets -->
                                 <div class="w-full">
                                     <div class="flex justify-between items-center mb-2">
-                                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-300">Tickets</h4>
+                                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-300">{{ __('pages.epics_overview.tickets') }}</h4>
                                         <a href="{{ route('filament.admin.resources.tickets.create', ['epic_id' => $epic->id]) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
                                             <x-heroicon-s-plus class="w-4 h-4 inline-block mr-1" />
-                                            Add Ticket
+                                            {{ __('pages.epics_overview.actions.add_ticket') }}
                                         </a>
                                     </div>
                                     
                                     @if($epic->tickets->isEmpty())
                                         <div class="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-4 rounded-md text-center border border-dashed border-gray-300 dark:border-gray-600 w-full">
-                                            No tickets found for this epic.
+                                            {{ __('pages.epics_overview.empty.tickets') }}
                                         </div>
                                     @else
                                         <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-md w-full">
                                             <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
                                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                                     <tr>
-                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ticket</th>
-                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Assign To</th>
-                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Due Date</th>
+                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('pages.epics_overview.table.id') }}</th>
+                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('pages.epics_overview.table.ticket') }}</th>
+                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('pages.epics_overview.table.status') }}</th>
+                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">{{ __('pages.epics_overview.table.assignees') }}</th>
+                                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">{{ __('pages.epics_overview.table.due_date') }}</th>
                                                         <th scope="col" class="relative px-3 py-2">
-                                                            <span class="sr-only">Actions</span>
+                                                            <span class="sr-only">{{ __('pages.epics_overview.table.actions') }}</span>
                                                         </th>
                                                     </tr>
                                                 </thead>
@@ -122,13 +122,13 @@
                                                                         'Done' => 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
                                                                         default => 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
                                                                     } }}">
-                                                                    {{ $ticket->status->name ?? 'No Status' }}
+                                                                    {{ $ticket->status->name ?? __('pages.epics_overview.no_status') }}
                                                                 </span>
                                                             </td>
                                                             <td class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                                                                 @if($ticket->assignees->isEmpty())
                                                                     <x-filament::badge color="gray" icon="heroicon-m-user-minus">
-                                                                        Unassigned
+                                                                        {{ __('pages.epics_overview.unassigned') }}
                                                                     </x-filament::badge>
                                                                 @else
                                                                     <div class="flex flex-wrap gap-1">
@@ -160,7 +160,7 @@
                                                             <td class="px-3 py-2 whitespace-nowrap text-right text-xs font-medium">
                                                               
                                                                 <a href="{{ route('filament.admin.resources.tickets.view', ['record' => $ticket->id]) }}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300">
-                                                                    View
+                                                                    {{ __('pages.epics_overview.actions.view') }}
                                                                 </a>
                                                             </td>
                                                         </tr>
@@ -182,9 +182,9 @@
             <div class="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-6">
                 <x-heroicon-o-flag class="w-16 h-16 text-gray-400 dark:text-gray-500" />
             </div>
-            <h2 class="text-xl font-medium text-gray-600 dark:text-gray-300">No epics found in this project</h2>
+            <h2 class="text-xl font-medium text-gray-600 dark:text-gray-300">{{ __('pages.epics_overview.empty_epics.title') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                This project doesn't have any epics yet. Create an epic to organize your tickets.
+                {{ __('pages.epics_overview.empty_epics.description') }}
             </p>
         </div>
     @else
@@ -193,9 +193,9 @@
             <div class="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-6">
                 <x-heroicon-o-flag class="w-16 h-16 text-gray-400 dark:text-gray-500" />
             </div>
-            <h2 class="text-xl font-medium text-gray-600 dark:text-gray-300">Please select a project first</h2>
+            <h2 class="text-xl font-medium text-gray-600 dark:text-gray-300">{{ __('pages.shared.select_project_first') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                Select a project from the dropdown above to view its epics
+                {{ __('pages.epics_overview.no_project_selected_hint') }}
             </p>
         </div>
     @endif

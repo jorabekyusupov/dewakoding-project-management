@@ -26,10 +26,30 @@ class ProjectResource extends Resource
     protected static ?string $navigationGroup = null;
     protected static ?int $navigationSort = 1;
 
-    public static function getNavigationGroup(): ?string
+
+    /**
+     * @return string|null
+     */
+    public static function getNavigationLabel(): string
     {
-        return __('navigation.project_management');
+        return __('projects');
     }
+    /**
+     * @return string|null
+     */
+    public static function getLabel(): ?string
+    {
+        return __('project');
+    }
+
+    /**
+     * @return string|null
+     */
+    public static function getPluralLabel(): ?string
+    {
+        return __('projects');
+    }
+
 
     public static function form(Form $form): Form
     {

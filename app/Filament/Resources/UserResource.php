@@ -26,6 +26,14 @@ class UserResource extends Resource
         return __('resources.users.navigation_label');
     }
 
+    /**
+     * @return string|null
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -5,10 +5,10 @@
             <div class="fi-ta-actions flex shrink-0 items-center gap-3">
                 <x-filament::input.wrapper>
                     <x-filament::input.select wire:model.live="timeRange">
-                        <option value="1month">Last Month</option>
-                        <option value="3months">Last 3 Months</option>
-                        <option value="6months">Last 6 Months</option>
-                        <option value="1year">Last Year</option>
+                        <option value="1month">{{ __('pages.user_contributions.time_range.last_month') }}</option>
+                        <option value="3months">{{ __('pages.user_contributions.time_range.last_3_months') }}</option>
+                        <option value="6months">{{ __('pages.user_contributions.time_range.last_6_months') }}</option>
+                        <option value="1year">{{ __('pages.user_contributions.time_range.last_year') }}</option>
                     </x-filament::input.select>
                 </x-filament::input.wrapper>
             </div>
@@ -45,7 +45,7 @@
                                     {{ $userData['user']->name }}
                                 </h3>
                                 <p class="fi-section-header-description text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $this->getTimeRangeLabel() }} Activity
+                                    {{ __('pages.user_contributions.activity_label', ['range' => $this->getTimeRangeLabel()]) }}
                                 </p>
                             </div>
                         </div>
@@ -62,7 +62,7 @@
                                     <p class="text-lg font-bold text-gray-900 dark:text-white">
                                         {{ number_format($userData['stats']['tickets_created']) }}
                                     </p>
-                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Tickets Created</p>
+                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('pages.user_contributions.stats.tickets_created') }}</p>
                                 </div>
 
                                 <!-- Status Changes -->
@@ -70,7 +70,7 @@
                                     <p class="text-lg font-bold text-gray-900 dark:text-white">
                                         {{ number_format($userData['stats']['status_changes']) }}
                                     </p>
-                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Status Changes</p>
+                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('pages.user_contributions.stats.status_changes') }}</p>
                                 </div>
 
                                 <!-- Comments Made -->
@@ -78,7 +78,7 @@
                                     <p class="text-lg font-bold text-gray-900 dark:text-white">
                                         {{ number_format($userData['stats']['comments_made']) }}
                                     </p>
-                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Comments Made</p>
+                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('pages.user_contributions.stats.comments_made') }}</p>
                                 </div>
 
                                 <!-- Active Days -->
@@ -86,29 +86,29 @@
                                     <p class="text-lg font-bold text-gray-900 dark:text-white">
                                         {{ number_format($userData['stats']['active_days']) }}
                                     </p>
-                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Active Days</p>
+                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('pages.user_contributions.stats.active_days') }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Heatmap Section -->
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between">
                                 <h4 class="text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                                    Daily Contributions
+                                    {{ __('pages.user_contributions.daily_heading') }}
                                 </h4>
                                 
                                 <!-- Legend -->
                                 <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                    <span>Less</span>
+                                    <span>{{ __('pages.user_contributions.legend.less') }}</span>
                                     <div class="flex gap-1">
-                                        <div class="h-3 w-3 rounded-sm bg-gray-200 dark:bg-gray-700" title="No activity"></div>
-                                        <div class="h-3 w-3 rounded-sm" style="background-color: #9be9a8" title="Low activity (1-2)"></div>
-                                        <div class="h-3 w-3 rounded-sm" style="background-color: #40c463" title="Medium activity (3-5)"></div>
-                                        <div class="h-3 w-3 rounded-sm" style="background-color: #30a14e" title="High activity (6-10)"></div>
-                                        <div class="h-3 w-3 rounded-sm" style="background-color: #216e39" title="Very high activity (11+)"></div>
+                                        <div class="h-3 w-3 rounded-sm bg-gray-200 dark:bg-gray-700" title="{{ __('pages.user_contributions.legend.none') }}"></div>
+                                        <div class="h-3 w-3 rounded-sm" style="background-color: #9be9a8" title="{{ __('pages.user_contributions.legend.low') }}"></div>
+                                        <div class="h-3 w-3 rounded-sm" style="background-color: #40c463" title="{{ __('pages.user_contributions.legend.medium') }}"></div>
+                                        <div class="h-3 w-3 rounded-sm" style="background-color: #30a14e" title="{{ __('pages.user_contributions.legend.high') }}"></div>
+                                        <div class="h-3 w-3 rounded-sm" style="background-color: #216e39" title="{{ __('pages.user_contributions.legend.very_high') }}"></div>
                                     </div>
-                                    <span>More</span>
+                                    <span>{{ __('pages.user_contributions.legend.more') }}</span>
                                 </div>
                             </div>
 
@@ -120,13 +120,13 @@
                                         <div class="flex gap-1">
                                             <!-- Vertical Day Labels -->
                                             <div class="flex flex-col gap-1 mr-2">
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Sun</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Mon</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Tue</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Wed</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Thu</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Fri</div>
-                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">Sat</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.sun') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.mon') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.tue') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.wed') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.thu') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.fri') }}</div>
+                                                <div class="h-3 w-8 flex items-center justify-end text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('pages.user_contributions.days.sat') }}</div>
                                             </div>
                                             
                                             <!-- Heatmap Weeks -->
@@ -161,7 +161,7 @@
                                                             class="contribution-square h-3 w-3 rounded-sm cursor-pointer transition-all duration-150 hover:ring-2 hover:ring-primary-500/50"
                                                             style="{{ $colorStyle }}"
                                                             data-dark-style="{{ $darkColorStyle }}"
-                                                            title="{{ Carbon\Carbon::parse($day['date'])->format('M j, Y') }}: {{ $activityCount }} contributions"
+                                                            title="{{ Carbon\Carbon::parse($day['date'])->translatedFormat('d M Y') }}: {{ trans_choice('pages.user_contributions.contributions', $activityCount, ['count' => $activityCount]) }}"
                                                         ></div>
                                                     @endforeach
                                                 </div>
@@ -183,10 +183,10 @@
                             </svg>
                         </div>
                         <h4 class="fi-ta-empty-state-heading text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                            No contributions found
+                            {{ __('pages.user_contributions.empty.title') }}
                         </h4>
                         <p class="fi-ta-empty-state-description text-sm text-gray-500 dark:text-gray-400">
-                            There are no user contributions to display for the selected time period.
+                            {{ __('pages.user_contributions.empty.description') }}
                         </p>
                     </div>
                 </div>
@@ -203,7 +203,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
-                    <span class="text-sm font-medium text-gray-950 dark:text-white">Loading contributions...</span>
+                    <span class="text-sm font-medium text-gray-950 dark:text-white">{{ __('pages.user_contributions.loading') }}</span>
                 </div>
             </div>
         </div>
