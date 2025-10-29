@@ -11,6 +11,8 @@ build:
   stage: build
   script:
     - echo "$ENV" > .env
+    - cat .env
+    - ls -la
     - docker build -t $DOCKER_IMAGE:$TAG -f Dockerfile .
   only:
     - main
