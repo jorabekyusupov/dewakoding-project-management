@@ -15,6 +15,11 @@ class TicketStatusesRelationManager extends RelationManager
 {
     protected static string $relationship = 'ticketStatuses';
 
+
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('project-statuses');
+    }
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
         return $ownerRecord->ticket_statuses_count ?? $ownerRecord->ticketStatuses()->count();

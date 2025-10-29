@@ -17,7 +17,10 @@ class MembersRelationManager extends RelationManager
     protected static string $relationship = 'members';
 
     protected TicketNotificationService $ticketNotificationService;
-
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('members');
+    }
     public function boot(TicketNotificationService $ticketNotificationService): void
     {
         $this->ticketNotificationService = $ticketNotificationService;

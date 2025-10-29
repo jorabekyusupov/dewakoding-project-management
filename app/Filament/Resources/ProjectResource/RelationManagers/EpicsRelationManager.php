@@ -17,7 +17,10 @@ class EpicsRelationManager extends RelationManager
     {
         return $ownerRecord->epics_count ?? $ownerRecord->epics()->count();
     }
-
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('epics');
+    }
     public function form(Form $form): Form
     {
         return $form

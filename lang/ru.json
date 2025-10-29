@@ -213,6 +213,8 @@
   "no_projects": "Нет проектов",
   "no_projects_found": "Проекты не найдены",
   "overdue": "Просрочено",
+  "project-statuses": "Статусы проекта",
+  "epics": "Этапы",
   "pages.epics_overview.actions.add_ticket": "Добавить задачу",
   "pages.epics_overview.actions.view": "Открыть",
   "pages.epics_overview.assignees_more": " +:count ещё",

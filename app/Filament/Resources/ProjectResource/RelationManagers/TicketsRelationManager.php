@@ -33,7 +33,10 @@ class TicketsRelationManager extends RelationManager
     protected ?int $editingTicketOriginalStatusId = null;
 
     protected ?string $editingTicketOriginalStatusName = null;
-
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('tickets');
+    }
     public function boot(TicketNotificationService $ticketNotificationService): void
     {
         $this->ticketNotificationService = $ticketNotificationService;
