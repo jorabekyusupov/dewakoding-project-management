@@ -6,7 +6,7 @@ use App\Livewire\ExternalDashboard;
 use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 // Google Authentication Routes
