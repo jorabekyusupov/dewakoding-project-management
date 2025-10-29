@@ -25,17 +25,17 @@ class EpicsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Epic Name'),
+                    ->label(__('resources.project.epics.form.name')),
                 Forms\Components\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
-                    ->label('Sort Order')
-                    ->helperText('Lower numbers appear first'),
+                    ->label(__('resources.project.epics.form.sort_order'))
+                    ->helperText(__('resources.project.epics.form.sort_order_help')),
                 Forms\Components\DatePicker::make('start_date')
-                    ->label('Start Date')
+                    ->label(__('resources.project.epics.form.start_date'))
                     ->nullable(),
                 Forms\Components\DatePicker::make('end_date')
-                    ->label('End Date')
+                    ->label(__('resources.project.epics.form.end_date'))
                     ->nullable(),
                 Forms\Components\RichEditor::make('description')
                     ->columnSpanFull()
@@ -49,7 +49,7 @@ class EpicsRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('resources.project.epics.columns.sort_order'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -62,7 +62,7 @@ class EpicsRelationManager extends RelationManager
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tickets_count')
                     ->counts('tickets')
-                    ->label('Tickets'),
+                    ->label(__('resources.project.epics.columns.tickets')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

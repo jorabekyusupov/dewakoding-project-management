@@ -25,19 +25,22 @@ class TicketStatusesRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('resources.project.statuses.form.name'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\ColorPicker::make('color')
+                    ->label(__('resources.project.statuses.form.color'))
                     ->required()
                     ->default('#3490dc')
-                    ->helperText('Select a color for this status'),
+                    ->helperText(__('resources.project.statuses.form.color_help')),
                 Forms\Components\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
-                    ->helperText('Determines display order in the project board (lower values appear first)'),
+                    ->label(__('resources.project.statuses.form.sort_order'))
+                    ->helperText(__('resources.project.statuses.form.sort_order_help')),
                 Forms\Components\Toggle::make('is_completed')
-                    ->label('Mark as Completed Status')
-                    ->helperText('Only one status per project can be marked as completed')
+                    ->label(__('resources.project.statuses.form.is_completed'))
+                    ->helperText(__('resources.project.statuses.form.is_completed_help'))
                     ->default(false)
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set, $record) {
@@ -49,14 +52,14 @@ class TicketStatusesRelationManager extends RelationManager
                                 ->when($record, fn($query) => $query->where('id', '!=', $record->id))
                                 ->first();
                             
-                            if ($existingCompleted) {
-                                $set('is_completed', false);
-                                Notification::make()
-                                    ->warning()
-                                    ->title('Cannot mark as completed')
-                                    ->body("Status '{$existingCompleted->name}' is already marked as completed for this project. Only one status can be marked as completed.")
-                                    ->send();
-                            }
+                                if ($existingCompleted) {
+                                    $set('is_completed', false);
+                                    Notification::make()
+                                        ->warning()
+                                        ->title(__('resources.project.statuses.notifications.cannot_mark'))
+                                        ->body(__('resources.project.statuses.notifications.completed_exists_detailed', ['status' => $existingCompleted->name]))
+                                        ->send();
+                                }
                         }
                     }),
             ]);
@@ -67,11 +70,14 @@ class TicketStatusesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\ColorColumn::make('color'),
-                Tables\Columns\TextColumn::make('sort_order'),
+                Tables\Columns\TextColumn::make('name')
+                    ->label(__('resources.project.statuses.columns.name')),
+                Tables\Columns\ColorColumn::make('color')
+                    ->label(__('resources.project.statuses.columns.color')),
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label(__('resources.project.statuses.columns.sort_order')),
                 Tables\Columns\IconColumn::make('is_completed')
-                    ->label('Completed')
+                    ->label(__('resources.project.statuses.columns.completed'))
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -100,8 +106,8 @@ class TicketStatusesRelationManager extends RelationManager
                                 $data['is_completed'] = false;
                                 Notification::make()
                                     ->warning()
-                                    ->title('Cannot mark as completed')
-                                    ->body("Status '{$existingCompleted->name}' is already marked as completed for this project.")
+                                    ->title(__('resources.project.statuses.notifications.cannot_mark'))
+                                    ->body(__('resources.project.statuses.notifications.completed_exists', ['status' => $existingCompleted->name]))
                                     ->send();
                             }
                         }
@@ -124,8 +130,8 @@ class TicketStatusesRelationManager extends RelationManager
                                 $data['is_completed'] = false;
                                 Notification::make()
                                     ->warning()
-                                    ->title('Cannot mark as completed')
-                                    ->body("Status '{$existingCompleted->name}' is already marked as completed for this project.")
+                                    ->title(__('resources.project.statuses.notifications.cannot_mark'))
+                                    ->body(__('resources.project.statuses.notifications.completed_exists', ['status' => $existingCompleted->name]))
                                     ->send();
                             }
                         }

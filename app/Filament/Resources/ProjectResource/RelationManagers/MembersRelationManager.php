@@ -55,7 +55,7 @@ class MembersRelationManager extends RelationManager
                 Tables\Actions\AttachAction::make()
                     ->preloadRecordSelect()
                     ->recordSelectSearchColumns(['name', 'email'])
-                    ->label('Add Member')
+                    ->label(__('resources.project.members.actions.add'))
                     ->after(function (Model $record) {
                         $project = $this->getOwnerRecord();
                         $user = User::find($record->id);
@@ -76,7 +76,7 @@ class MembersRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\DetachAction::make()
-                    ->label('Remove')
+                    ->label(__('resources.project.members.actions.remove'))
                     ->after(function (Model $record) {
                         $project = $this->getOwnerRecord();
                         $user = User::find($record->id);
@@ -90,7 +90,7 @@ class MembersRelationManager extends RelationManager
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DetachBulkAction::make()
-                        ->label('Remove Selected'),
+                        ->label(__('resources.project.members.actions.remove_selected')),
                 ]),
             ]);
     }

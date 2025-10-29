@@ -16,16 +16,32 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Actions\StaticAction;
+use Illuminate\Database\Eloquent\Model;
 
 class NotesRelationManager extends RelationManager
 {
     protected static string $relationship = 'notes';
 
-    protected static ?string $title = 'Project Notes';
+    protected static ?string $title = null;
 
-    protected static ?string $modelLabel = 'Note';
+    protected static ?string $modelLabel = null;
 
-    protected static ?string $pluralModelLabel = 'Notes';
+    protected static ?string $pluralModelLabel = null;
+
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('resources.project.notes.title');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('resources.project.notes.labels.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('resources.project.notes.labels.plural');
+    }
 
     public function form(Form $form): Form
     {
@@ -37,10 +53,10 @@ class NotesRelationManager extends RelationManager
                     ->columnSpanFull(),
                 
                 DatePicker::make('note_date')
-                    ->label('Note Date')
+                    ->label(__('resources.project.notes.fields.note_date'))
                     ->default(now())
                     ->required(),
-                
+
                 RichEditor::make('content')
                     ->required()
                     ->columnSpanFull()
@@ -60,8 +76,8 @@ class NotesRelationManager extends RelationManager
                         'underline',
                         'undo',
                     ])
-                    ->helperText('Write your meeting summary or project notes here with rich formatting.'),
-                
+                    ->helperText(__('resources.project.notes.fields.content_help')),
+
                 Forms\Components\Hidden::make('created_by')
                     ->default(auth()->id()),
             ]);
@@ -80,11 +96,11 @@ class NotesRelationManager extends RelationManager
                 TextColumn::make('note_date')
                     ->date('M d, Y')
                     ->sortable(),
-                
+
                 TextColumn::make('creator.name')
-                    ->label('Created by')
+                    ->label(__('resources.project.notes.columns.created_by'))
                     ->sortable(),
-                
+
                 TextColumn::make('created_at')
                     ->dateTime('M d, Y H:i')
                     ->sortable()
@@ -93,12 +109,12 @@ class NotesRelationManager extends RelationManager
             ->filters([
                 Tables\Filters\Filter::make('recent')
                     ->query(fn ($query) => $query->where('created_at', '>=', now()->subDays(30)))
-                    ->label('Recent (30 days)'),
+                    ->label(__('resources.project.notes.filters.recent')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
-                    ->label('Add Note')
+                    ->label(__('resources.project.notes.actions.add'))
                     ->modalWidth('2xl')
                     ->closeModalByClickingAway(false)
                     ,
@@ -116,8 +132,8 @@ class NotesRelationManager extends RelationManager
                 ]),
             ])
             ->defaultSort('note_date', 'desc')
-            ->emptyStateHeading('No project notes yet')
-            ->emptyStateDescription('Start documenting your project meetings and important notes.')
+            ->emptyStateHeading(__('resources.project.notes.empty.heading'))
+            ->emptyStateDescription(__('resources.project.notes.empty.description'))
             ->emptyStateIcon('heroicon-o-document-text');
     }
 }

@@ -44,7 +44,7 @@ class ViewTicket extends ViewRecord
                 }),
 
             Actions\Action::make('addComment')
-                ->label('Add Comment')
+                ->label(__('resources.ticket.view.actions.add_comment'))
                 ->icon('heroicon-o-chat-bubble-left-right')
                 ->color('success')
                 ->form([
@@ -66,14 +66,14 @@ class ViewTicket extends ViewRecord
                         ->update(['read_at' => now()]);
 
                     Notification::make()
-                        ->title('Comment added successfully')
+                        ->title(__('resources.ticket.view.notifications.comment_added'))
                         ->success()
                         ->send();
                 })
                 ->visible($canComment),
 
             Action::make('back')
-                ->label('Back to Board')
+                ->label(__('resources.ticket.view.actions.back_to_board'))
                 ->color('gray')
                 ->url(fn () => ProjectBoard::getUrl(['project_id' => $this->record->project_id])),
         ];
@@ -85,7 +85,7 @@ class ViewTicket extends ViewRecord
 
         if (! $comment) {
             Notification::make()
-                ->title('Comment not found')
+                ->title(__('resources.ticket.view.notifications.comment_not_found'))
                 ->danger()
                 ->send();
 
@@ -95,7 +95,7 @@ class ViewTicket extends ViewRecord
         // Check if user can edit (only comment owner or super admin)
         if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
             Notification::make()
-                ->title('You do not have permission to edit this comment')
+                ->title(__('resources.ticket.view.notifications.edit_forbidden'))
                 ->danger()
                 ->send();
 
@@ -112,7 +112,7 @@ class ViewTicket extends ViewRecord
 
         if (! $comment) {
             Notification::make()
-                ->title('Comment not found')
+                ->title(__('resources.ticket.view.notifications.comment_not_found'))
                 ->danger()
                 ->send();
 
@@ -122,7 +122,7 @@ class ViewTicket extends ViewRecord
         // Check if user can delete (only comment owner or super admin)
         if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
             Notification::make()
-                ->title('You do not have permission to delete this comment')
+                ->title(__('resources.ticket.view.notifications.delete_forbidden'))
                 ->danger()
                 ->send();
 
@@ -132,7 +132,7 @@ class ViewTicket extends ViewRecord
         $comment->delete();
 
         Notification::make()
-            ->title('Comment deleted successfully')
+            ->title(__('resources.ticket.view.notifications.comment_deleted'))
             ->success()
             ->send();
 
@@ -150,14 +150,14 @@ class ViewTicket extends ViewRecord
                             Section::make()
                                 ->schema([
                                     TextEntry::make('uuid')
-                                        ->label('Ticket ID')
+                                        ->label(__('resources.ticket.view.fields.id'))
                                         ->copyable(),
 
                                     TextEntry::make('name')
-                                        ->label('Ticket Name'),
+                                        ->label(__('resources.ticket.view.fields.name')),
 
                                     TextEntry::make('project.name')
-                                        ->label('Project'),
+                                        ->label(__('resources.ticket.view.fields.project')),
                                 ]),
                         ])->columnSpan(1),
 
@@ -165,7 +165,7 @@ class ViewTicket extends ViewRecord
                             Section::make()
                                 ->schema([
                                     TextEntry::make('status.name')
-                                        ->label('Status')
+                                        ->label(__('resources.ticket.view.fields.status'))
                                         ->badge()
                                         ->color(fn ($state) => match ($state) {
                                             'To Do' => 'warning',
@@ -177,17 +177,17 @@ class ViewTicket extends ViewRecord
 
                                     // FIXED: Multi-user assignees
                                     TextEntry::make('assignees.name')
-                                        ->label('Assigned To')
+                                        ->label(__('resources.ticket.view.fields.assignees'))
                                         ->badge()
                                         ->separator(',')
-                                        ->default('Unassigned'),
+                                        ->default(__('resources.ticket.view.values.unassigned')),
 
                                     TextEntry::make('creator.name')
-                                        ->label('Created By')
-                                        ->default('Unknown'),
+                                        ->label(__('resources.ticket.view.fields.creator'))
+                                        ->default(__('resources.ticket.view.values.unknown_user')),
 
                                     TextEntry::make('due_date')
-                                        ->label('Due Date')
+                                        ->label(__('resources.ticket.view.fields.due_date'))
                                         ->date(),
                                 ]),
                         ])->columnSpan(1),
@@ -196,21 +196,21 @@ class ViewTicket extends ViewRecord
                             Section::make()
                                 ->schema([
                                     TextEntry::make('created_at')
-                                        ->label('Created At')
+                                        ->label(__('resources.ticket.view.fields.created_at'))
                                         ->dateTime(),
 
                                     TextEntry::make('updated_at')
-                                        ->label('Updated At')
+                                        ->label(__('resources.ticket.view.fields.updated_at'))
                                         ->dateTime(),
 
                                     TextEntry::make('epic.name')
-                                        ->label('Epic')
-                                        ->default('No Epic'),
+                                        ->label(__('resources.ticket.view.fields.epic'))
+                                        ->default(__('resources.ticket.view.values.no_epic')),
                                 ]),
                         ])->columnSpan(1),
                     ]),
 
-                Section::make('Description')
+                Section::make(__('resources.ticket.view.sections.description'))
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         TextEntry::make('description')
@@ -219,12 +219,12 @@ class ViewTicket extends ViewRecord
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Comments')
+                Section::make(__('resources.ticket.view.sections.comments'))
                     ->icon('heroicon-o-chat-bubble-left-right')
-                    ->description('Discussion about this ticket')
+                    ->description(__('resources.ticket.view.sections.comments_description'))
                     ->schema([
                         TextEntry::make('comments_list')
-                            ->label('Recent Comments')
+                            ->label(__('resources.ticket.view.fields.recent_comments'))
                             ->state(function (Ticket $record) {
                                 if (method_exists($record, 'comments')) {
                                     return $record->comments()->with('user')->oldest()->get();
@@ -236,7 +236,7 @@ class ViewTicket extends ViewRecord
                     ])
                     ->collapsible(),
 
-                Section::make('Status History')
+                Section::make(__('resources.ticket.view.sections.status_history'))
                     ->icon('heroicon-o-clock')
                     ->collapsible()
                     ->schema([
@@ -251,7 +251,7 @@ class ViewTicket extends ViewRecord
     {
         return [
             Action::make('editComment')
-                ->label('Edit Comment')
+                ->label(__('resources.ticket.view.actions.edit_comment'))
                 ->mountUsing(function (Forms\Form $form, array $arguments) {
                     $commentId = $arguments['commentId'] ?? null;
 
@@ -274,7 +274,7 @@ class ViewTicket extends ViewRecord
                     Hidden::make('commentId')
                         ->required(),
                     RichEditor::make('comment')
-                        ->label('Comment')
+                        ->label(__('resources.ticket.view.fields.comment'))
                         ->toolbarButtons([
                             'blockquote',
                             'bold',
@@ -297,7 +297,7 @@ class ViewTicket extends ViewRecord
 
                     if (! $comment) {
                         Notification::make()
-                            ->title('Comment not found')
+                            ->title(__('resources.ticket.view.notifications.comment_not_found'))
                             ->danger()
                             ->send();
 
@@ -307,7 +307,7 @@ class ViewTicket extends ViewRecord
                     // Check permissions
                     if (! auth()->user()->can('update', $comment)) {
                         Notification::make()
-                            ->title('You do not have permission to edit this comment')
+                            ->title(__('resources.ticket.view.notifications.edit_forbidden'))
                             ->danger()
                             ->send();
 
@@ -319,7 +319,7 @@ class ViewTicket extends ViewRecord
                     ]);
 
                     Notification::make()
-                        ->title('Comment updated successfully')
+                        ->title(__('resources.ticket.view.notifications.comment_updated'))
                         ->success()
                         ->send();
 
@@ -330,8 +330,8 @@ class ViewTicket extends ViewRecord
                     $this->redirect($this->getResource()::getUrl('view', ['record' => $this->getRecord()]));
                 })
                 ->modalWidth('lg')
-                ->modalHeading('Edit Comment')
-                ->modalSubmitActionLabel('Update')
+                ->modalHeading(__('resources.ticket.view.modals.edit_comment.heading'))
+                ->modalSubmitActionLabel(__('resources.ticket.view.modals.edit_comment.submit'))
                 ->color('success')
                 ->icon('heroicon-o-pencil'),
         ];

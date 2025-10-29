@@ -20,17 +20,17 @@ class ViewProject extends ViewRecord
         return [
             Actions\EditAction::make(),
             Actions\Action::make('board')
-                ->label('Project Board')
+                ->label(__('resources.project.view.actions.project_board'))
                 ->icon('heroicon-o-view-columns')
                 ->color('info')
                 ->url(fn () => \App\Filament\Pages\ProjectBoard::getUrl(['project_id' => $this->record->id])),
             Actions\Action::make('external_access')
-                ->label('External Dashboard')
+                ->label(__('resources.project.view.actions.external_dashboard'))
                 ->icon('heroicon-o-globe-alt')
                 ->color('success')
                 ->visible(fn () => auth()->user()->hasRole('super_admin'))
-                ->modalHeading('External Dashboard Access')
-                ->modalDescription('Share these credentials with external users to access the project dashboard.')
+                ->modalHeading(__('resources.project.view.actions.external_modal_heading'))
+                ->modalDescription(__('resources.project.view.actions.external_modal_description'))
                 ->modalContent(function () {
                     $record = $this->record;
                     $externalAccess = $record->externalAccess;
@@ -49,7 +49,7 @@ class ViewProject extends ViewRecord
                     ]);
                 })
                 ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Close'),
+                ->modalCancelActionLabel(__('resources.project.view.actions.external_modal_close')),
         ];
     }
 
@@ -57,43 +57,45 @@ class ViewProject extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make('Project Information')
+                Section::make(__('resources.project.view.sections.information'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('name')
-                                    ->label('Project Name')
+                                    ->label(__('resources.project.view.fields.name'))
                                     ->weight(FontWeight::Bold)
                                     ->size('lg'),
                                 TextEntry::make('ticket_prefix')
-                                    ->label('Ticket Prefix')
+                                    ->label(__('resources.project.view.fields.ticket_prefix'))
                                     ->badge()
                                     ->color('primary'),
                             ]),
                         TextEntry::make('description')
-                            ->label('Description')
+                            ->label(__('resources.project.view.fields.description'))
                             ->html()
                             ->columnSpanFull(),
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('start_date')
-                                    ->label('Start Date')
+                                    ->label(__('resources.project.view.fields.start_date'))
                                     ->date('d/m/Y')
-                                    ->placeholder('Not set'),
+                                    ->placeholder(__('resources.project.view.values.not_set')),
                                 TextEntry::make('end_date')
-                                    ->label('End Date')
+                                    ->label(__('resources.project.view.fields.end_date'))
                                     ->date('d/m/Y')
-                                    ->placeholder('Not set'),
+                                    ->placeholder(__('resources.project.view.values.not_set')),
                             ]),
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('remaining_days')
-                                    ->label('Remaining Days')
+                                    ->label(__('resources.project.view.fields.remaining_days'))
                                     ->getStateUsing(function ($record): ?string {
                                         if (!$record->end_date) {
-                                            return 'Not set';
+                                            return __('resources.project.view.values.not_set');
                                         }
-                                        return $record->remaining_days . ' days';
+                                        return trans_choice('resources.project.view.values.remaining_days_text', $record->remaining_days, [
+                                            'count' => $record->remaining_days,
+                                        ]);
                                     })
                                     ->badge()
                                     ->color(fn ($record): string => 
@@ -102,51 +104,53 @@ class ViewProject extends ViewRecord
                                         ($record->remaining_days <= 7 ? 'warning' : 'success'))
                                     ),
                                 TextEntry::make('pinned_date')
-                                    ->label('Pinned Status')
+                                    ->label(__('resources.project.view.fields.pinned_status'))
                                     ->getStateUsing(function ($record): string {
-                                        return $record->pinned_date ? 'Pinned on ' . $record->pinned_date->format('d/m/Y H:i') : 'Not pinned';
+                                        return $record->pinned_date
+                                            ? __('resources.project.view.values.pinned_on', ['date' => $record->pinned_date->format('d/m/Y H:i')])
+                                            : __('resources.project.view.values.not_pinned');
                                     })
                                     ->badge()
                                     ->color(fn ($record): string => $record->pinned_date ? 'success' : 'gray'),
                             ]),
                     ]),
                 
-                Section::make('Project Statistics')
+                Section::make(__('resources.project.view.sections.statistics'))
                     ->schema([
                         Grid::make(4)
                             ->schema([
                                 TextEntry::make('members_count')
-                                    ->label('Total Members')
+                                    ->label(__('resources.project.view.fields.total_members'))
                                     ->getStateUsing(fn ($record) => $record->members()->count())
                                     ->badge()
                                     ->color('info'),
                                 TextEntry::make('tickets_count')
-                                    ->label('Total Tickets')
+                                    ->label(__('resources.project.view.fields.total_tickets'))
                                     ->getStateUsing(fn ($record) => $record->tickets()->count())
                                     ->badge()
                                     ->color('primary'),
                                 TextEntry::make('epics_count')
-                                    ->label('Total Epics')
+                                    ->label(__('resources.project.view.fields.total_epics'))
                                     ->getStateUsing(fn ($record) => $record->epics()->count())
                                     ->badge()
                                     ->color('warning'),
                                 TextEntry::make('statuses_count')
-                                    ->label('Ticket Statuses')
+                                    ->label(__('resources.project.view.fields.statuses_count'))
                                     ->getStateUsing(fn ($record) => $record->ticketStatuses()->count())
                                     ->badge()
                                     ->color('success'),
                             ]),
                     ]),
                     
-                Section::make('Timestamps')
+                Section::make(__('resources.project.view.sections.timestamps'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('created_at')
-                                    ->label('Created At')
+                                    ->label(__('resources.project.view.fields.created_at'))
                                     ->dateTime('d/m/Y H:i'),
                                 TextEntry::make('updated_at')
-                                    ->label('Last Updated')
+                                    ->label(__('resources.project.view.fields.updated_at'))
                                     ->dateTime('d/m/Y H:i'),
                             ]),
                     ])
