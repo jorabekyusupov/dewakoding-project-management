@@ -1,0 +1,40 @@
+stages:
+  - build
+  - deploy
+  - migrate
+
+variables:
+  TAG: ${CI_PIPELINE_IID}
+  DOCKER_IMAGE: kanban
+
+build:
+  stage: build
+  script:
+    - echo "$ENV" > .env
+    - docker build -t $DOCKER_IMAGE:$TAG -f Dockerfile .
+  only:
+    - main
+  tags:
+    - temppriz
+
+deploy:
+  stage: deploy
+  script:
+    - docker compose down
+    - docker volume rm kanban || echo "Volume not found, skipping"
+    - docker compose up -d 
+  only:
+    - main
+  tags:
+    - temppriz
+  
+migrate:
+  stage: migrate
+  script:
+    - docker exec kanban php artisan migrate
+  when: manual
+  only:
+    - main
+  tags:
+    - temppriz
+
