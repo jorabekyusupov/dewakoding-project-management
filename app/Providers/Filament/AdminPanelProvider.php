@@ -42,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->emailVerification()
-            ->login(Login::class)
+            ->login()
             ->profile(EditProfile::class)
             ->topNavigation()
             ->maxContentWidth(MaxWidth::Full)
