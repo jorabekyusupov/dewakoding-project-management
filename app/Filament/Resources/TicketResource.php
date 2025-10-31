@@ -361,6 +361,13 @@ class TicketResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('download_file')
+                    ->iconButton()
+                    ->icon('heroicon-c-folder-arrow-down')
+                    ->visible(fn(Ticket $record): bool => !empty($record->file))
+                    ->action(function ($record) {
+                        return response()->download(storage_path('app/public/' . $record->file));
+                    }),
                 Action::make('copy')
                     ->label(__('resources.tickets.actions.copy'))
                     ->icon('heroicon-o-document-duplicate')
