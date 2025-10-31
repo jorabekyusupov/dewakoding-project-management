@@ -356,7 +356,7 @@ class TicketResource extends Resource
                                 fn(Builder $query, $date): Builder => $query->whereDate('due_date', '<=', $date),
                             );
                     }),
-            ])
+            ],Tables\Enums\FiltersLayout::AboveContent)
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Tables\Actions\ViewAction::make(),

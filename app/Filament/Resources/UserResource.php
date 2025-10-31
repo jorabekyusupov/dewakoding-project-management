@@ -144,7 +144,7 @@ class UserResource extends Resource
                 Tables\Filters\Filter::make('email_unverified')
                     ->label(__('resources.users.filters.email_unverified'))
                     ->query(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
-            ])
+            ],Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
