@@ -342,8 +342,10 @@ class TicketResource extends Resource
 
                 Tables\Filters\Filter::make('due_date')
                     ->form([
-                        Forms\Components\DatePicker::make('due_from'),
-                        Forms\Components\DatePicker::make('due_until'),
+                        Forms\Components\DatePicker::make('due_from')
+                        ->label(__('due from')),
+                        Forms\Components\DatePicker::make('due_until')
+                        ->label(__('due until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -355,7 +357,8 @@ class TicketResource extends Resource
                                 $data['due_until'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('due_date', '<=', $date),
                             );
-                    }),
+                    })
+                    ->columns(2),
             ],Tables\Enums\FiltersLayout::AboveContent)
             ->defaultSort('created_at', 'desc')
             ->actions([
