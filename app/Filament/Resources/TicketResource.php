@@ -228,9 +228,9 @@ class TicketResource extends Resource
                     ->label(__('resources.tickets.form.priority'))
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'High' => 'danger',
-                        'Medium' => 'warning',
-                        'Low' => 'success',
+                        'Высокий' => 'danger',
+                        'Средний' => 'warning',
+                        'Низкий' => 'success',
                         default => 'gray',
                     })
                     ->sortable()
