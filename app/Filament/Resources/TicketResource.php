@@ -362,8 +362,6 @@ class TicketResource extends Resource
             ],Tables\Enums\FiltersLayout::AboveContent)
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('download_file')
                     ->iconButton()
                     ->icon('heroicon-c-folder-arrow-down')
@@ -371,6 +369,8 @@ class TicketResource extends Resource
                     ->action(function ($record) {
                         return response()->download(storage_path('app/public/' . $record->file));
                     }),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
                 Action::make('copy')
                     ->label(__('resources.tickets.actions.copy'))
                     ->icon('heroicon-o-document-duplicate')
