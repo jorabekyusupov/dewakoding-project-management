@@ -384,7 +384,7 @@ public static function getNavigationGroup(): string|UnitEnum|null
             ],Tables\Enums\FiltersLayout::AboveContent)
             ->defaultSort('created_at', 'desc')
             ->recordActions([
-                Tables\Actions\Action::make('download_file')
+                Action::make('download_file')
                     ->iconButton()
                     ->icon('heroicon-c-folder-arrow-down')
                     ->visible(fn(Ticket $record): bool => !empty($record->file))

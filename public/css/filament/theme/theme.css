@@ -152,5 +152,10 @@ select:where(.dark, .dark *) option {
 
 }
 .dark\:bg-gray-700:where(.dark,.dark *), .dark\:bg-gray-700\/50:where(.dark,.dark *) {
-    background-color: #1f2231 !important;
+    background-color: var( --dark-card-bg-color) !important;
+}
+
+.fi-simple-main:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+    --tw-ring-color: #ffffff1a;
 }
