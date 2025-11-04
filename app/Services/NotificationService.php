@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Mail\ProjectAssignmentNotification;
 use App\Models\Notification;
 use App\Models\Project;
@@ -119,7 +120,7 @@ class NotificationService
                     'assigned_by_name' => $assignedBy->name,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to create in-app notification: ' . $e->getMessage(), [
                 'project_id' => $project->id,
                 'user_id' => $assignedUser->id,
@@ -130,7 +131,7 @@ class NotificationService
         try {
             $mail = new ProjectAssignmentNotification($project, $assignedUser, $assignedBy);
             Mail::to($assignedUser->email)->send($mail);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log error but don't fail the assignment
             Log::error('Failed to send project assignment email: ' . $e->getMessage(), [
                 'project_id' => $project->id,

@@ -18,7 +18,7 @@ class DownloadTicketTemplateAction
             ->label(__('actions.download_template.label'))
             ->icon('heroicon-m-arrow-down-tray')
             ->color('info')
-            ->form([
+            ->schema([
                 Select::make('project_id')
                     ->label(__('actions.download_template.select_project'))
                     ->options(function () {

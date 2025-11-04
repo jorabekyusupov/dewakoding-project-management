@@ -12,7 +12,7 @@ class TicketsPerProjectChart extends ChartWidget
 {
     use HasWidgetShield;
     
-    protected static ?string $heading = null;
+    protected ?string $heading = 'Number of tickets per project';
     
     protected static ?int $sort = 2;
     
@@ -21,7 +21,7 @@ class TicketsPerProjectChart extends ChartWidget
         'xl' => 1,
     ];
     
-    protected static ?string $maxHeight = '300px';
+    protected ?string $maxHeight = '300px';
     
     protected static ?string $pollingInterval = '30s';
 

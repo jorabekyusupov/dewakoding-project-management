@@ -2,6 +2,9 @@
 
 namespace App\Filament\Actions;
 
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Actions;
+use Exception;
 use App\Imports\TicketsImport;
 use App\Exports\TicketTemplateExport;
 use App\Models\Project;
@@ -24,7 +27,7 @@ class ImportTicketsAction
             ->label(__('actions.import_tickets.label'))
             ->icon('heroicon-m-arrow-up-tray')
             ->color('success')
-            ->form([
+            ->schema([
                 Section::make(__('actions.import_tickets.section_title'))
                     ->description(__('actions.import_tickets.section_description'))
                     ->schema([
@@ -52,7 +55,7 @@ class ImportTicketsAction
                             }),
                         
                         Actions::make([
-                            FormAction::make('download_template')
+                            Action::make('download_template')
                                 ->label(__('actions.import_tickets.download_template'))
                                 ->icon('heroicon-m-arrow-down-tray')
                                 ->color('info')
@@ -159,7 +162,7 @@ class ImportTicketsAction
                             ->send();
                     }
                     
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Clean up uploaded file
                     Storage::disk('local')->delete($data['excel_file']);
                     

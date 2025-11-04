@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use Exception;
+use Log;
 use App\Models\Project;
 use App\Models\Ticket;
 use Auth;
@@ -16,12 +18,12 @@ class TicketTimeline extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar';
-    protected static ?string $navigationLabel = null;
-    protected static ?string $title = null;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
+    protected static ?string $navigationLabel = 'Ticket Timeline';
+    protected static ?string $title = 'Ticket Timeline';
     protected static ?int $navigationSort = 6;
-    protected static string $view = 'filament.pages.ticket-timeline';
-    protected static ?string $navigationGroup = null;
+    protected string $view = 'filament.pages.ticket-timeline';
+    protected static string | \UnitEnum | null $navigationGroup = 'Project Management';
     protected static ?string $slug = 'ticket-timeline/{project_id?}';
 
     public static function getNavigationLabel(): string
@@ -66,8 +68,8 @@ class TicketTimeline extends Page implements HasForms
                 $this->projectId = (string) $project_id;
                 $this->selectedProject = Project::find($project_id);
             }
-        } catch (\Exception $e) {
-            \Log::error('Error in TicketTimeline mount: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Error in TicketTimeline mount: ' . $e->getMessage());
             
             Notification::make()
                 ->title(__('pages.ticket_timeline.notifications.error_loading'))
@@ -170,8 +172,8 @@ class TicketTimeline extends Page implements HasForms
                     
                     $ganttTasks[] = $taskData;
                     
-                } catch (\Exception $e) {
-                    \Log::error('Error processing ticket ' . $ticket->id . ': ' . $e->getMessage());
+                } catch (Exception $e) {
+                    Log::error('Error processing ticket ' . $ticket->id . ': ' . $e->getMessage());
                     continue;
                 }
             }
@@ -181,8 +183,8 @@ class TicketTimeline extends Page implements HasForms
                 'links' => []
             ];
             
-        } catch (\Exception $e) {
-            \Log::error('Error generating gantt data: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Error generating gantt data: ' . $e->getMessage());
             return ['data' => [], 'links' => []];
         }
     }
@@ -225,8 +227,8 @@ class TicketTimeline extends Page implements HasForms
             $progress = (($currentPosition + 1) / $totalStatuses) * 100;
             
             return (int) round(max(0, min(100, $progress)));
-        } catch (\Exception $e) {
-            \Log::error('Error calculating progress: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Error calculating progress: ' . $e->getMessage());
             return 0;
         }
     }

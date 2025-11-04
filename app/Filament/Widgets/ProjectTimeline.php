@@ -12,7 +12,7 @@ use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 class ProjectTimeline extends Widget
 {
     use HasWidgetShield;
-    protected static string $view = 'filament.widgets.project-timeline';
+    protected string $view = 'filament.widgets.project-timeline';
     
     protected int | string | array $columnSpan = 'full';
 

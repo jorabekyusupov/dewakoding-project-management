@@ -10,7 +10,7 @@ class UserStatisticsChart extends ChartWidget
 {
     use HasWidgetShield;
     
-    protected static ?string $heading = null;
+    protected ?string $heading = 'User Statistics Chart';
     
     protected int | string | array $columnSpan = [
         'md' => 2,
@@ -19,7 +19,7 @@ class UserStatisticsChart extends ChartWidget
     
     protected static ?int $sort = 3;
     
-    protected static ?string $maxHeight = '300px';
+    protected ?string $maxHeight = '300px';
     
     protected static ?string $pollingInterval = '30s';
 

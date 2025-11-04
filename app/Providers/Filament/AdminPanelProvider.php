@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\UserResource\Pages\EditProfile;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -48,13 +49,13 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(MaxWidth::Full)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->pages([
+                Dashboard::class,
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->colors([
                 'primary' => Color::Blue,
-            ])
-            ->pages([
-                Pages\Dashboard::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -72,6 +73,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->passwordReset()
+            ->emailVerification()
+            ->profile()
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }
