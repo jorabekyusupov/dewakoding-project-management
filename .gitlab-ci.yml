@@ -2,6 +2,8 @@ stages:
   - build
   - deploy
   - migrate
+  - optimize_clear
+  - optimize
 
 variables:
   TAG: ${CI_PIPELINE_IID}
@@ -22,12 +24,12 @@ deploy:
   script:
     - docker compose down
     - docker volume rm kanban || echo "Volume not found, skipping"
-    - docker compose up -d 
+    - docker compose up -d
   only:
     - main
   tags:
     - temppriz
-  
+
 migrate:
   stage: migrate
   script:
@@ -37,4 +39,20 @@ migrate:
     - main
   tags:
     - temppriz
+
+optimize_clear:
+  stage: optimize_clear
+  script:
+    - docker exec kanban php artisan optimize:clear
+  when: manual
+  only:
+    - developer
+
+optimize:
+  stage: optimize
+  script:
+    - docker exec kanban php artisan optimize
+  when: manual
+  only:
+    - developer
 
