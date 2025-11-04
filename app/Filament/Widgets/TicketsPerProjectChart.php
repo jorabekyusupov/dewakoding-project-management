@@ -23,7 +23,7 @@ class TicketsPerProjectChart extends ChartWidget
     
     protected ?string $maxHeight = '300px';
     
-    protected static ?string $pollingInterval = '30s';
+    protected  ?string $pollingInterval = '30s';
 
     public function getHeading(): ?string
     {

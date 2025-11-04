@@ -11,9 +11,9 @@ use Livewire\Attributes\On;
 
 class EpicsOverview extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-flag';
-    protected static string $view = 'filament.pages.epics-overview';
-    protected static ?string $navigationGroup = null;
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-flag';
+    protected  string $view = 'filament.pages.epics-overview';
+    protected static string|null|\UnitEnum $navigationGroup = null;
     protected static ?string $navigationLabel = null;
     protected static ?string $title = null;
     protected static ?int $navigationSort = 7;

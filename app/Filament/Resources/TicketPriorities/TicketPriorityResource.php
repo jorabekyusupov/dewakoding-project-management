@@ -34,9 +34,7 @@ class TicketPriorityResource extends Resource
 
     protected static ?string $pluralLabel = null;
 
-    protected static ?string $navigationGroup = null;
-
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|null|\UnitEnum $navigationGroup = null;
 
     public static function getNavigationLabel(): string
     {

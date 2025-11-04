@@ -24,7 +24,7 @@ use App\Services\TicketNotificationService;
 class ProjectBoard extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-view-columns';
-    protected static string $view = 'filament.pages.project-board';
+    protected  string $view = 'filament.pages.project-board';
     protected static ?string $title = null;
     protected static ?string $navigationLabel = null;
     protected static string | \UnitEnum | null $navigationGroup = null;

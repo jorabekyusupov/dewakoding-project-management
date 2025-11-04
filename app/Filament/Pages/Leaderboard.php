@@ -22,7 +22,7 @@ class Leaderboard extends Page implements HasForms
     protected static ?string $navigationLabel = null;
     protected static ?string $title = null;
     protected static ?int $navigationSort = 6;
-    protected static string $view = 'filament.pages.leaderboard';
+    protected  string $view = 'filament.pages.leaderboard';
     protected static  string | \UnitEnum | null $navigationGroup = 'Analytics';
     protected static ?string $slug = 'leaderboard';
 
