@@ -15,10 +15,8 @@ use Livewire\Attributes\On;
 use App\Filament\Actions\ExportTicketsAction;
 use App\Exports\TicketsExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Form;
 
 class ProjectBoard extends Page
 {
@@ -79,7 +77,10 @@ class ProjectBoard extends Page
             $this->ticketStatuses = collect();
             $this->projectUsers = collect();
             $this->selectedUserIds = [];
-            $this->redirect(static::getUrl());
+
+            // Use wire:navigate for SPA-like navigation
+            $url = static::getUrl();
+            $this->js("Livewire.navigate('{$url}')");
         }
     }
 
@@ -88,15 +89,16 @@ class ProjectBoard extends Page
         $this->selectedTicket = null;
         $this->ticketStatuses = collect();
         $this->selectedProjectId = $projectId;
-        $this->selectedProject = Project::find($projectId);
+        $this->selectedProject = Project::with('tickets')->find($projectId);
         $this->selectedUserIds = [];
 
         if ($this->selectedProject) {
-            $url = static::getUrl(['project_id' => $projectId]);
-            $this->redirect($url);
-
             $this->loadProjectUsers();
             $this->loadTicketStatuses();
+
+            // Use wire:navigate for SPA-like navigation
+            $url = static::getUrl(['project_id' => $projectId]);
+            $this->js("Livewire.navigate('{$url}')");
         }
     }
 

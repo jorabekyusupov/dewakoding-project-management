@@ -83,14 +83,15 @@ class EpicsOverview extends Page
     public function updatedSelectedProjectId($value): void
     {
         $this->selectedProjectId = $value ? (int) $value : null;
-        
+
         if ($this->selectedProjectId) {
             $url = static::getUrl(['project_id' => $this->selectedProjectId]);
-            $this->redirect($url);
+            $this->js("Livewire.navigate('{$url}')");
         } else {
-            $this->redirect(static::getUrl());
+            $url = static::getUrl();
+            $this->js("Livewire.navigate('{$url}')");
         }
-        
+
         $this->loadEpics();
         $this->expandedEpics = $this->epics->pluck('id')->toArray();
     }
