@@ -159,3 +159,11 @@ select:where(.dark, .dark *) option {
     background-color: var( --dark-card-bg-color) !important;
     --tw-ring-color: #ffffff1a;
 }
+.fi-wi-stats-overview-stat:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+
+    --tw-ring-color: #ffffff1a;
+}
+.fi-section {
+    box-shadow: none !important;
+}

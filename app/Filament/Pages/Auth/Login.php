@@ -12,9 +12,6 @@ class Login extends BaseLogin
     {
         parent::mount();
         
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-            fn (): string => view('filament.components.google-login-button')->render(),
-        );
+
     }
 }
