@@ -72,7 +72,10 @@ class TicketTimeline extends Page implements HasForms
         } else {
             $this->selectedProject = null;
             $this->projectId = null;
-            $this->redirect(static::getUrl());
+
+            // Use wire:navigate for SPA-like navigation
+            $url = static::getUrl();
+            $this->js("Livewire.navigate('{$url}')");
         }
     }
 
@@ -80,15 +83,17 @@ class TicketTimeline extends Page implements HasForms
     {
         $this->projectId = (string) $projectId;
         $this->selectedProject = Project::find($projectId);
-    
+
         if ($this->selectedProject && $this->projects->contains('id', $projectId)) {
-            $this->redirect(static::getUrl(['project_id' => $projectId]), navigate: true);
+            // Use wire:navigate for SPA-like navigation
+            $url = static::getUrl(['project_id' => $projectId]);
+            $this->js("Livewire.navigate('{$url}')");
         } else {
             Notification::make()
                 ->title('Project Not Found')
                 ->danger()
                 ->send();
-                
+
             $this->selectedProject = null;
             $this->projectId = null;
         }

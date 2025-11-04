@@ -79,7 +79,6 @@
             /* Today marker line styling */
             .gantt_marker.today {
                 background-color: #EF4444 !important;
-                /* Red color for today line */
                 opacity: 0.8;
                 z-index: 9000;
             }
@@ -92,6 +91,104 @@
                 padding: 2px 6px;
                 border-radius: 4px;
                 white-space: nowrap;
+            }
+
+            /* Dark Mode Support for dhtmlxGantt */
+            .dark .gantt_container,
+            .dark .gantt_grid,
+            .dark .gantt_task,
+            .dark .gantt_task_bg {
+                background-color: #1f2937 !important;
+            }
+
+            .dark .gantt_grid_scale,
+            .dark .gantt_grid_head_cell {
+                background-color: #374151 !important;
+                color: #f3f4f6 !important;
+                border-color: #4b5563 !important;
+            }
+
+            .dark .gantt_cell,
+            .dark .gantt_grid_data .gantt_cell {
+                background-color: #1f2937 !important;
+                color: #e5e7eb !important;
+                border-color: #374151 !important;
+            }
+
+            .dark .gantt_row,
+            .dark .gantt_row.odd {
+                background-color: #1f2937 !important;
+                border-color: #374151 !important;
+            }
+
+            .dark .gantt_row:hover,
+            .dark .gantt_row.odd:hover {
+                background-color: #374151 !important;
+            }
+
+            .dark .gantt_task_cell {
+                border-color: #374151 !important;
+            }
+
+            .dark .gantt_scale_line,
+            .dark .gantt_scale_cell {
+                background-color: #374151 !important;
+                color: #f3f4f6 !important;
+                border-color: #4b5563 !important;
+            }
+
+            .dark .gantt_task_scale .gantt_scale_cell {
+                border-color: #4b5563 !important;
+            }
+
+            .dark .gantt_side_content {
+                color: #e5e7eb !important;
+            }
+
+            .dark .gantt_link_arrow {
+                border-color: #9ca3af !important;
+            }
+
+            .dark .gantt_link_line_wrapper .gantt_link_line {
+                background-color: #9ca3af !important;
+            }
+
+            /* Grid borders in dark mode */
+            .dark .gantt_grid_data .gantt_row {
+                border-bottom: 1px solid #374151 !important;
+            }
+
+            .dark .gantt_grid_data .gantt_cell {
+                border-right: 1px solid #374151 !important;
+            }
+
+            /* Task area in dark mode */
+            .dark .gantt_task_row {
+                background-color: #1f2937 !important;
+                border-bottom: 1px solid #374151 !important;
+            }
+
+            .dark .gantt_task_row.gantt_row_task:hover {
+                background-color: #374151 !important;
+            }
+
+            /* Scrollbar styling for dark mode */
+            .dark .gantt_layout_cell::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+
+            .dark .gantt_layout_cell::-webkit-scrollbar-track {
+                background: #1f2937;
+            }
+
+            .dark .gantt_layout_cell::-webkit-scrollbar-thumb {
+                background: #4b5563;
+                border-radius: 4px;
+            }
+
+            .dark .gantt_layout_cell::-webkit-scrollbar-thumb:hover {
+                background: #6b7280;
             }
         </style>
     @endpush
