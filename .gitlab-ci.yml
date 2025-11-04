@@ -46,7 +46,7 @@ optimize_clear:
     - docker exec kanban php artisan optimize:clear
   when: manual
   only:
-    - developer
+    - main
 
 optimize:
   stage: optimize
@@ -54,5 +54,5 @@ optimize:
     - docker exec kanban php artisan optimize
   when: manual
   only:
-    - developer
+    - main
 
