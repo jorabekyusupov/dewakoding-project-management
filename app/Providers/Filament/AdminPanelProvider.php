@@ -77,7 +77,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->passwordReset()
             ->emailVerification()
-            ->profile()
-            ->viteTheme(base_path('resources/css/filament/admin/theme.css'));
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }
