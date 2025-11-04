@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Epic;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use UnitEnum;
 
 class TicketResource extends Resource
 {
@@ -51,6 +52,10 @@ class TicketResource extends Resource
         return __('resources.tickets.navigation_label');
     }
 
+public static function getNavigationGroup(): string|UnitEnum|null
+{
+    return __('navigation.project_management');
+}
 
     /**
      * @return string|null
