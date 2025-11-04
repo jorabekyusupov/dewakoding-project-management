@@ -9,10 +9,10 @@ use Carbon\Carbon;
 
 class ProjectTimeline extends Page
 {
-    protected static string $view = 'filament.pages.project-timeline';
+    protected  string $view = 'filament.pages.project-timeline';
     protected static ?string $navigationLabel = null;
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = null;
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string|null|\UnitEnum $navigationGroup = null;
     protected static ?int $navigationSort = 3;
     protected static ?string $slug = 'project-timeline';
 

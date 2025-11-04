@@ -16,16 +16,16 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Form;
+
 use App\Services\TicketNotificationService;
 
 class ProjectBoard extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
-    protected static string $view = 'filament.pages.project-board';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-view-columns';
+    protected  string $view = 'filament.pages.project-board';
     protected static ?string $title = null;
     protected static ?string $navigationLabel = null;
-    protected static ?string $navigationGroup = null;
+    protected static string|null|\UnitEnum $navigationGroup = null;
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationLabel(): string
@@ -82,7 +82,7 @@ class ProjectBoard extends Page
 
         if ($project_id) {
             $this->selectedProjectId = (int) $project_id;
-            $this->selectedProject = Project::find($project_id);
+                        $this->selectedProject = $this->projects->find($project_id);
             $this->loadProjectUsers();
             $this->loadTicketStatuses();
         } else {
@@ -191,13 +191,13 @@ class ProjectBoard extends Page
         $this->loadTicketStatuses();
     }
     
-    public function setSortOrder($statusId, $sortOrder)
+        public function setSortOrder(int $statusId, string $sortOrder)
     {
         $this->sortOrders[$statusId] = $sortOrder;
         $this->loadTicketStatuses();
     }
     
-    private function applySorting($tickets, $sortOrder)
+        private function applySorting(Collection $tickets, string $sortOrder): Collection
     {
         switch ($sortOrder) {
             case 'date_created_newest':
