@@ -106,4 +106,9 @@ class User extends Authenticatable implements FilamentUser
 
         return $this->hasAnyRole($roles);
     }
+
+    public function authlogs()
+    {
+        return $this->hasMany(UserAuthLog::class);
+    }
 }

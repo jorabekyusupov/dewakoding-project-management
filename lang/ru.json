@@ -1,5 +1,12 @@
 {
+  "user auth logs": "Журналы аутентификации пользователей",
+  "activity": "Активность",
+  "login_time": "Время входа",
+  "logout_time": "Время выхода (Автоматически, если отсутствует)",
+  "login_history": "История входов",
   "Actions": "Действия",
+  "user_agent": "Агент",
+  "ip_address": "IP",
   "Active projects in the system": "Активные проекты в системе",
   "Add Comment": "Добавить комментарий",
   "Add Member": "Добавить участника",
