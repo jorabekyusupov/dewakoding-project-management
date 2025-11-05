@@ -7,10 +7,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ColorPicker;
 use App\Filament\Resources\Projects\Pages\CreateProject;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
@@ -79,6 +81,10 @@ class ProjectResource extends Resource
                 TextInput::make('ticket_prefix')
                     ->required()
                     ->maxLength(255),
+                ColorPicker::make('color')
+                    ->label('Project Color')
+                    ->helperText('Choose a color for the project card and badge')
+                    ->nullable(),
                 DatePicker::make('start_date')
                     ->label(__('resources.projects.form.start_date'))
                     ->native(false)
@@ -140,6 +146,10 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
+                ColorColumn::make('color')
+                    ->label('')
+                    ->width('40px')
+                    ->default('#6B7280'),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('ticket_prefix')

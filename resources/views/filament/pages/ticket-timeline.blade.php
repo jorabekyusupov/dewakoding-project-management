@@ -1,33 +1,143 @@
 <x-filament-panels::page>
     <div class="space-y-6">
-        <!-- Project Filter -->
-        <div class="mb-6">
-            <x-filament::section>
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                    <div class="flex-1">
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ $selectedProject ? $selectedProject->name : __('pages.shared.select_project') }}
+        {{-- Project Selector --}}
+        @if(!$selectedProject)
+            <div class="mb-6">
+                <x-filament::section>
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Select Project
                         </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            Choose a project to view its timeline
+                        </p>
                     </div>
 
-                    <div class="w-full lg:w-auto">
-                        <x-filament::input.wrapper>
-                            <x-filament::input.select wire:model.live="projectId" class="w-full lg:min-w-[200px]">
-                                <option value="">{{ __('pages.shared.select_project') }}</option>
-                                @foreach ($projects as $project)
-                                    <option value="{{ $project->id }}"
-                                        {{ $projectId == $project->id ? 'selected' : '' }}>
+                    @if($projects->isEmpty())
+                        <div class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                            <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">No Projects Available</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">You don't have access to any projects yet.</p>
+                        </div>
+                    @else
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                            @foreach($projects as $project)
+                                <button
+                                    wire:click="selectProject({{ $project->id }})"
+                                    class="relative p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-all text-left overflow-hidden"
+                                    style="border-left: 4px solid {{ $project->color ?? '#6B7280' }};"
+                                >
+                                    {{-- Project Prefix Badge --}}
+                                    @if($project->ticket_prefix)
+                                        @php
+                                            $color = $project->color ?? '#6B7280';
+                                            $hex = ltrim($color, '#');
+                                            $r = hexdec(substr($hex, 0, 2));
+                                            $g = hexdec(substr($hex, 2, 2));
+                                            $b = hexdec(substr($hex, 4, 2));
+                                            $brightness = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+                                            $textColor = $brightness > 155 ? '#1F2937' : '#FFFFFF';
+                                        @endphp
+                                        <div class="inline-flex px-2.5 py-1 rounded text-xs font-semibold mb-3"
+                                             style="background-color: {{ $color }}; color: {{ $textColor }};">
+                                            {{ $project->ticket_prefix }}
+                                        </div>
+                                    @endif
+
+                                    {{-- Project Name --}}
+                                    <h3 class="font-semibold text-base text-gray-900 dark:text-white line-clamp-2">
                                         {{ $project->name }}
-                                    </option>
-                                @endforeach
-                            </x-filament::input.select>
-                        </x-filament::input.wrapper>
+                                    </h3>
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+                </x-filament::section>
+            </div>
+        @else
+            {{-- Project Switcher --}}
+            <div class="mb-4" x-data="{ open: false }">
+                <div class="relative">
+                    <button
+                        @click="open = !open"
+                        @click.away="open = false"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-800 border-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        style="border-color: {{ $selectedProject->color ?? '#D1D5DB' }};"
+                    >
+                        @if($selectedProject->ticket_prefix)
+                            @php
+                                $color = $selectedProject->color ?? '#6B7280';
+                                $hex = ltrim($color, '#');
+                                $r = hexdec(substr($hex, 0, 2));
+                                $g = hexdec(substr($hex, 2, 2));
+                                $b = hexdec(substr($hex, 4, 2));
+                                $brightness = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+                                $textColor = $brightness > 155 ? '#1F2937' : '#FFFFFF';
+                            @endphp
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold"
+                                  style="background-color: {{ $color }}; color: {{ $textColor }};">
+                                {{ $selectedProject->ticket_prefix }}
+                            </span>
+                        @endif
+                        <span>{{ $selectedProject->name }}</span>
+                        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu --}}
+                    <div
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                        style="display: none;"
+                    >
+                        <div class="p-2">
+                            <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Switch Project
+                            </div>
+                            @foreach($projects as $project)
+                                <button
+                                    wire:click="selectProject({{ $project->id }})"
+                                    @click="open = false"
+                                    class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left {{ $project->id === $selectedProject->id ? 'bg-gray-50 dark:bg-gray-700' : '' }}"
+                                >
+                                    @if($project->ticket_prefix)
+                                        @php
+                                            $color = $project->color ?? '#6B7280';
+                                            $hex = ltrim($color, '#');
+                                            $r = hexdec(substr($hex, 0, 2));
+                                            $g = hexdec(substr($hex, 2, 2));
+                                            $b = hexdec(substr($hex, 4, 2));
+                                            $brightness = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+                                            $textColor = $brightness > 155 ? '#1F2937' : '#FFFFFF';
+                                        @endphp
+                                        <span class="px-2 py-0.5 rounded text-xs font-semibold"
+                                              style="background-color: {{ $color }}; color: {{ $textColor }};">
+                                            {{ $project->ticket_prefix }}
+                                        </span>
+                                    @endif
+                                    <div class="flex-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white truncate">
+                                        {{ $project->name }}
+                                    </div>
+                                    @if($project->id === $selectedProject->id)
+                                        <svg class="w-4 h-4 flex-shrink-0" style="color: {{ $project->color ?? '#3B82F6' }};" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    @endif
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
-            </x-filament::section>
-        </div>
+            </div>
+        @endif
 
-        @if ($selectedProject)
+        @if($selectedProject)
             <!-- dhtmlxGantt Chart -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -60,15 +170,6 @@
                         </div>
                     @endif
                 </div>
-            </div>
-        @else
-            <div class="flex flex-col items-center justify-center h-64 text-gray-500 gap-4">
-                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
-                </svg>
-                <h2 class="text-xl font-medium">{{ __('pages.ticket_timeline.no_project.title') }}</h2>
-                <p class="text-sm">{{ __('pages.ticket_timeline.no_project.description') }}</p>
             </div>
         @endif
     </div>

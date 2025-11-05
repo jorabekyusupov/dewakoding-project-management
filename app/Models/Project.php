@@ -17,6 +17,7 @@ class Project extends Model
         'name',
         'description',
         'ticket_prefix',
+        'color',
         'start_date',
         'end_date',
         'pinned_date',
