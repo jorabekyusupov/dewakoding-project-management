@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use Exception;
+use Throwable;
 use Carbon\Carbon;
 use App\Models\Ticket;
 use App\Models\Project;
@@ -80,7 +82,7 @@ class ExternalDashboard extends Component
             // Show success notification
             session()->flash('message', 'Data refreshed successfully!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Log::error('Error refreshing dashboard data: ' . $e->getMessage());
             session()->flash('error', 'Failed to refresh data. Please try again.');
         }
@@ -383,7 +385,7 @@ class ExternalDashboard extends Component
 
                     $ganttTasks[] = $taskData;
 
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Error processing ticket ' . $ticket->id . ': ' . $e->getMessage());
                     continue;
                 }
@@ -394,7 +396,7 @@ class ExternalDashboard extends Component
                 'links' => []
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error generating gantt data: ' . $e->getMessage());
             return ['data' => [], 'links' => []];
         }
@@ -438,7 +440,7 @@ class ExternalDashboard extends Component
             $progress = (($currentPosition + 1) / $totalStatuses) * 100;
 
             return (int) round(max(0, min(100, $progress)));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Log::error('Error calculating progress: ' . $e->getMessage());
             return 0;
         }
@@ -491,7 +493,7 @@ class ExternalDashboard extends Component
                 'export_timestamp' => now()->toISOString()
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Log::error('Error exporting gantt data: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -510,10 +512,10 @@ class ExternalDashboard extends Component
             if (auth()->check()) {
                 auth()->guard()->logout();
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
         }
 
-        \Illuminate\Support\Facades\Session::forget('external_authenticated_' . $this->token);
+        Session::forget('external_authenticated_' . $this->token);
 
         request()->session()->invalidate();
         request()->session()->regenerateToken();

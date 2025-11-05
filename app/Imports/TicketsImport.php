@@ -2,6 +2,8 @@
 
 namespace App\Imports;
 
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Exception;
 use App\Models\Ticket;
 use App\Models\Project;
 use App\Models\User;
@@ -76,7 +78,7 @@ class TicketsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                 
                 // Handle Excel serial numbers (numeric dates)
                 if (is_numeric($dateString)) {
-                    $dueDate = Carbon::createFromFormat('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateString)->format('Y-m-d'));
+                    $dueDate = Carbon::createFromFormat('Y-m-d', Date::excelToDateTimeObject($dateString)->format('Y-m-d'));
                 } else {
                     // Try common date formats
                     $formats = ['Y-m-d', 'm/d/Y', 'd/m/Y', 'Y/m/d', 'd-m-Y', 'm-d-Y'];
@@ -84,7 +86,7 @@ class TicketsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                         try {
                             $dueDate = Carbon::createFromFormat($format, $dateString);
                             break;
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             continue;
                         }
                     }
@@ -94,7 +96,7 @@ class TicketsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                         $dueDate = Carbon::parse($dateString);
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Invalid date format, leave as null
             }
         }
@@ -106,14 +108,14 @@ class TicketsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                 $dateString = trim($row['start_date_yyyy_mm_dd']);
                 
                 if (is_numeric($dateString)) {
-                    $startDate = Carbon::createFromFormat('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateString)->format('Y-m-d'));
+                    $startDate = Carbon::createFromFormat('Y-m-d', Date::excelToDateTimeObject($dateString)->format('Y-m-d'));
                 } else {
                     $formats = ['Y-m-d', 'm/d/Y', 'd/m/Y', 'Y/m/d', 'd-m-Y', 'm-d-Y'];
                     foreach ($formats as $format) {
                         try {
                             $startDate = Carbon::createFromFormat($format, $dateString);
                             break;
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             continue;
                         }
                     }
@@ -122,7 +124,7 @@ class TicketsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                         $startDate = Carbon::parse($dateString);
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Invalid date format, leave as null
             }
         }

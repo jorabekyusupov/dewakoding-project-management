@@ -1,10 +1,12 @@
 # DewaKoding Project Management
 
+🎉 **Now using Filament 4!** 🎉
+
 ![image](https://raw.githubusercontent.com/SeptiawanAjiP/dewakoding-project-management/refs/heads/main/image-1.jpeg)
 ![image](https://raw.githubusercontent.com/SeptiawanAjiP/dewakoding-project-management/refs/heads/main/image-4.jpeg)
 ![image](https://raw.githubusercontent.com/SeptiawanAjiP/dewakoding-project-management/refs/heads/main/image-5.jpeg)
 
-A Laravel Filament 3 application for managing projects with ticket management and status tracking.
+A Laravel Filament 4 application for managing projects with ticket management and status tracking.
 
 ## Features
 
@@ -28,8 +30,8 @@ A Laravel Filament 3 application for managing projects with ticket management an
 
 - PHP > 8.2+
 - Laravel 12
-- MySQL 8.0+ / PostgreSQL 12+
 - Composer
+- Node.js & npm
 
 ![image](https://raw.githubusercontent.com/SeptiawanAjiP/dewakoding-project-management/refs/heads/main/image-2.jpeg)
 ![image](https://raw.githubusercontent.com/SeptiawanAjiP/dewakoding-project-management/refs/heads/main/image-6.jpeg)
@@ -41,25 +43,25 @@ A Laravel Filament 3 application for managing projects with ticket management an
 ## Installation
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/SeptiawanAjiP/dewakoding-project-management
    cd dewakoding-project-management
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    composer install
    npm install
    ```
 
 3. Set up environment:
-   ```
+   ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
 4. Configure database in `.env` file:
-   ```
+   ```env
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
@@ -69,33 +71,37 @@ A Laravel Filament 3 application for managing projects with ticket management an
    ```
 
 5. Run migrations:
-   ```
+   ```bash
    php artisan migrate
    ```
 
-6. Create storage link for file uploads
-   ```
+6. Create storage link for file uploads:
+   ```bash
    php artisan storage:link
    ```
 
 7. Create a Filament admin user:
-   ```
+   ```bash
    php artisan make:filament-user
    ```
-8. Activate Role & Permission
-   ```
+
+8. Activate Role & Permission:
+   ```bash
    php artisan shield:setup
    php artisan shield:install
    php artisan shield:super-admin
    ```
+
 9. Compile assets:
-   ```
+   ```bash
    npm run dev
    ```
+
 10. Start the development server:
-   ```
-   php artisan serve
-   ```
+    ```bash
+    php artisan serve
+    ```
+
 
 ## Usage
 
@@ -105,6 +111,34 @@ A Laravel Filament 3 application for managing projects with ticket management an
 4. Add team members to the project
 5. Create and customize ticket statuses
 6. Add tickets and assign to team members
+
+## ⚠️ Upgrade from Filament 3 to Filament 4
+
+**Important Notice**: This project has been upgraded to Filament 4. If you're upgrading from a previous version that used Filament 3, please follow these steps carefully:
+
+### Prerequisites
+1. **Backup your database** before starting the upgrade process
+2. Make sure you have the latest version of the codebase
+
+### Filament Shield Upgrade Steps
+The upgrade process for Filament Shield requires special attention. Please read the official upgrade guide first:
+**[Filament Shield Upgrade Guide](https://github.com/bezhanSalleh/filament-shield?tab=readme-ov-file#upgrade)**
+
+### Required Commands
+After updating your dependencies and following the official guide, run the following command to regenerate Shield policies and permissions:
+
+```bash
+php artisan shield:generate --all --option=policies
+```
+
+**Note**: Some upgrade steps related to filament-shield have already been implemented in the codebase. The command above will ensure all policies and permissions are properly generated for Filament 4 compatibility.
+
+### Post-Upgrade Verification
+1. Clear all caches: `php artisan optimize:clear`
+2. Test your role-based permissions
+3. Verify that all resources, pages, and widgets are accessible
+4. Check that user roles and permissions are working correctly
+
 
 ## Main Features
 
@@ -282,14 +316,4 @@ The application sends email notifications for:
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later).
-
-**Key Points:**
-- ✅ Free to use, modify, and distribute
-- ✅ Source code must remain open
-- ✅ Derivative works must also be GPL-licensed
-- ✅ Commercial use allowed
-- ⚠️ Any modifications or derivative works must be shared under the same GPL license
-- ⚠️ Must include copyright notice and license text
-
-For the full license text, see the [LICENSE](LICENSE) file.
+This project is licensed under the [MIT License](LICENSE).

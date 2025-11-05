@@ -128,3 +128,42 @@ select:where(.dark, .dark *) option {
     background-color: var(--dark-bg-color) !important;
 
 }
+
+.fi-topbar:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+}
+
+.fi-ta-ctn:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+}
+
+.fi-tabs:not(.fi-contained):where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+}
+:scope .fi-dropdown-panel:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+}
+.fi-body:where(.dark,.dark *) {
+    background-color: var( --dark-bg-color) !important;
+    color: #fff !important;
+}
+.fi-section:not(.fi-section-not-contained):not(.fi-aside):where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+
+}
+.dark\:bg-gray-700:where(.dark,.dark *), .dark\:bg-gray-700\/50:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+}
+
+.fi-simple-main:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+    --tw-ring-color: #ffffff1a;
+}
+.fi-wi-stats-overview-stat:where(.dark,.dark *) {
+    background-color: var( --dark-card-bg-color) !important;
+
+    --tw-ring-color: #ffffff1a;
+}
+.fi-section {
+    box-shadow: none !important;
+}

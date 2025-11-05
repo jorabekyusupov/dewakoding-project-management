@@ -1,14 +1,16 @@
 <?php
 
 namespace App\Filament\Resources\UserResource\Pages;
-use Filament\Pages\Auth\EditProfile as BaseEditProfile;
+
+use Filament\Auth\Pages\EditProfile as EditProfilePage;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-class EditProfile  extends BaseEditProfile
+use Filament\Schemas\Schema;
+
+class EditProfile  extends EditProfilePage
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
 
                 $this->getNameFormComponent(),

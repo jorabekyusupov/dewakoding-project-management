@@ -11,8 +11,8 @@ class ProjectTimeline extends Page
 {
     protected  string $view = 'filament.pages.project-timeline';
     protected static ?string $navigationLabel = null;
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-calendar-days';
-    protected static string|null|\UnitEnum $navigationGroup = null;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | \UnitEnum | null $navigationGroup = null;
     protected static ?int $navigationSort = 3;
     protected static ?string $slug = 'project-timeline';
 
@@ -25,7 +25,7 @@ class ProjectTimeline extends Page
     {
         return __('navigation.project_management');
     }
-    
+
     public array $counts = [];
     public array $ganttData = ['data' => [], 'links' => []];
     

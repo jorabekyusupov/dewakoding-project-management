@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Filament\Pages\ProjectBoard;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -36,7 +37,7 @@ class ProjectAssignmentNotification extends Mailable implements ShouldQueue
                 'project' => $this->project,
                 'assignedUser' => $this->assignedUser,
                 'assignedBy' => $this->assignedBy,
-                'projectUrl' => \App\Filament\Pages\ProjectBoard::getUrl(['project_id' => $this->project->id]),
+                'projectUrl' => ProjectBoard::getUrl(['project_id' => $this->project->id]),
             ]
         );
     }

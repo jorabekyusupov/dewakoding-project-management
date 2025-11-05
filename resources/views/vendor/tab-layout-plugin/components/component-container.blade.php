@@ -1,6 +1,6 @@
 @use('Illuminate\View\Component', 'ViewComponent')
 @use('SolutionForest\TabLayoutPlugin\Schemas\Components\LivewireContainer')
-<x-filament::grid
+<x-filament-schemas::grid
     :default="$getColumns('default')"
     :sm="$getColumns('sm')"
     :md="$getColumns('md')"
@@ -14,7 +14,7 @@
             $columns = $tabContainer->getColumnSpan() ?? [];
         @endphp
 
-        <x-filament::grid.column
+        <x-filament-tables::column-manager
             :default="$columns['default'] ?? null"
             :sm="$columns['sm'] ?? null"
             :md="$columns['md'] ?? null"
@@ -46,6 +46,6 @@
                     @livewire($livewireComponent, $tabContainer->getData() ?? [])
                 @endif
              @endif
-        </x-filament::grid.column>
+        </x-filament-tables::column-manager>
     @endforeach
 </x-filament::grid>

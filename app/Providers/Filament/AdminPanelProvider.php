@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\UserResource\Pages\EditProfile;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -14,7 +15,8 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\MaxWidth;
+
+use Filament\Support\Enums\Width;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -45,16 +47,16 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile(EditProfile::class)
             ->topNavigation()
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(Width::Full)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->pages([
+                Dashboard::class,
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->colors([
                 'primary' => Color::Blue,
-            ])
-            ->pages([
-                Pages\Dashboard::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -72,6 +74,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->passwordReset()
+            ->emailVerification()
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

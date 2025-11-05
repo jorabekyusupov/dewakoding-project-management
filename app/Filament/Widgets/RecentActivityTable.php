@@ -2,6 +2,12 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\Action;
 use App\Models\TicketHistory;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -40,7 +46,7 @@ class RecentActivityTable extends BaseWidget
                     ->latest()
             )
             ->columns([
-                Tables\Columns\TextColumn::make('activity_summary')
+                TextColumn::make('activity_summary')
                     ->label(__('widgets.recent_activity.columns.activity'))
                     ->state(function (TicketHistory $record): string {
                                 $ticketName = $record->ticket->name ?? __('widgets.recent_activity.activity_unknown_ticket');
@@ -60,7 +66,7 @@ class RecentActivityTable extends BaseWidget
                     ->html()
                     ->searchable(['users.name', 'tickets.name', 'tickets.uuid'])
                     ->weight('medium'),
-                Tables\Columns\TextColumn::make('status.name')
+                TextColumn::make('status.name')
                     ->label(__('resources.tickets.form.status'))
                     ->badge()
                     ->alignEnd()
@@ -75,12 +81,12 @@ class RecentActivityTable extends BaseWidget
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                Tables\Filters\Filter::make('date_range')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('start_date')
+                Filter::make('date_range')
+                    ->schema([
+                        DatePicker::make('start_date')
                             ->label(__('resources.tickets.form.start_date'))
                             ->default(today()),
-                        \Filament\Forms\Components\DatePicker::make('end_date')
+                        DatePicker::make('end_date')
                             ->label(__('resources.tickets.form.end_date'))
                             ->default(today()),
                     ])
@@ -104,19 +110,19 @@ class RecentActivityTable extends BaseWidget
                         return $indicators;
                     }),
 
-                Tables\Filters\Filter::make('today')
+                Filter::make('today')
                     ->label(__('Today Only'))
                     ->query(fn ($query) => $query->whereDate('created_at', today()))
                     ->toggle(),
 
-                Tables\Filters\SelectFilter::make('user')
+                SelectFilter::make('user')
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload(),
             ])
             ->filtersFormColumns(2)
-            ->actions([
-                Tables\Actions\Action::make('view')
+            ->recordActions([
+                Action::make('view')
                     ->label('')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->size('sm')

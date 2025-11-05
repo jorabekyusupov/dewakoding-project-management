@@ -68,23 +68,23 @@
                 touchStartY: 0,
                 scrollStartX: 0,
                 
+                moveTicketToStatus(ticketId, statusId) {
+                    $wire.call('moveTicket', parseInt(ticketId), parseInt(statusId));
+                },
+                
                 init() {
                     this.$nextTick(() => {
                         this.removeAllEventListeners();
                         this.attachAllEventListeners();
                         this.setupTouchScrolling();
                         this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                        
-                        // Add listeners for when user returns to the board
                         this.setupPageVisibilityListener();
                     });
                 },
                 
                 setupPageVisibilityListener() {
-                    // Listen for page visibility changes (when user returns to tab)
                     document.addEventListener('visibilitychange', () => {
                         if (!document.hidden) {
-                            // Page is visible again, reinitialize drag and drop
                             setTimeout(() => {
                                 this.removeAllEventListeners();
                                 this.attachAllEventListeners();
@@ -92,34 +92,27 @@
                         }
                     });
                     
-                    // Listen for window focus (when user returns to window)
                     window.addEventListener('focus', () => {
-                        // Window is focused again, reinitialize drag and drop
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 100);
                     });
                     
-                    // Listen for popstate event (when user navigates back)
                     window.addEventListener('popstate', () => {
-                        // User navigated back, reinitialize drag and drop
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 200);
                     });
                     
-                    // Listen for Livewire lifecycle events
                     document.addEventListener('livewire:navigated', () => {
-                        // Livewire navigated, reinitialize drag and drop
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 300);
                     });
                     
-                    // Listen for Livewire load and update events
                     document.addEventListener('livewire:load', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
@@ -127,7 +120,6 @@
                         }, 100);
                     });
                     
-                    // Listen for Livewire update events
                     document.addEventListener('livewire:updated', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
@@ -135,7 +127,6 @@
                         }, 100);
                     });
                     
-                    // Listen for custom board events
                     window.addEventListener('ticket-updated', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
@@ -143,7 +134,6 @@
                         }, 150);
                     });
                     
-                    // Periodic check to ensure drag and drop is working
                     setInterval(() => {
                         if (document.visibilityState === 'visible') {
                             this.ensureDragDropInitialized();
@@ -152,7 +142,6 @@
                 },
                 
                 ensureDragDropInitialized() {
-                    // Check if any ticket cards exist but are not draggable
                     const tickets = document.querySelectorAll('.ticket-card');
                     let needsReinitialization = false;
                     
@@ -162,7 +151,6 @@
                         }
                     });
                     
-                    // If any tickets are not draggable, reinitialize
                     if (needsReinitialization && tickets.length > 0) {
                         this.removeAllEventListeners();
                         this.attachAllEventListeners();
@@ -183,12 +171,9 @@
                         
                         const touchX = e.touches[0].clientX;
                         const touchY = e.touches[0].clientY;
-                        
-                        // Calculate both horizontal and vertical movement
                         const moveX = this.touchStartX - touchX;
                         const moveY = this.touchStartY - touchY;
                         
-                        // If horizontal movement is greater than vertical movement, prevent default scrolling
                         if (Math.abs(moveX) > Math.abs(moveY)) {
                             e.preventDefault();
                             container.scrollLeft = this.scrollStartX + moveX;
@@ -207,11 +192,9 @@
                     const columns = document.querySelectorAll('.status-column');
                     columns.forEach(column => {
                         const newColumn = column.cloneNode(false);
-                        
                         while (column.firstChild) {
                             newColumn.appendChild(column.firstChild);
                         }
-                        
                         if (column.parentNode) {
                             column.parentNode.replaceChild(newColumn, column);
                         }
@@ -219,15 +202,12 @@
                 },
                 
                 attachAllEventListeners() {
-                    // Check permission before attaching drag events
-                    // If user cannot move tickets, don't attach drag and drop listeners
                     @if(!$this->canMoveTickets())
-                        return; // Exit early if user doesn't have permission to move tickets
+                        return;
                     @endif
                     
                     const tickets = document.querySelectorAll('.ticket-card');
                     tickets.forEach(ticket => {
-                        // Enable dragging only for users with proper permissions
                         ticket.setAttribute('draggable', true);
                         
                         ticket.addEventListener('dragstart', (e) => {
@@ -241,13 +221,11 @@
                             this.draggingTicket = null;
                         });
                         
-                        // Touch events for mobile drag and drop
                         let longPressTimer;
                         let isDragging = false;
                         let originalColumn;
                         
                         ticket.addEventListener('touchstart', (e) => {
-                            // Only proceed if not already scrolling
                             if (isDragging) return;
                             
                             longPressTimer = setTimeout(() => {
@@ -255,32 +233,25 @@
                                 this.draggingTicket = ticket.getAttribute('data-ticket-id');
                                 ticket.classList.add('opacity-50', 'relative', 'z-30');
                                 isDragging = true;
-                                
-                                // Visual feedback
                                 ticket.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-                            }, 500); // 500ms long press
+                            }, 500);
                         }, { passive: true });
                         
                         ticket.addEventListener('touchmove', (e) => {
                             if (!isDragging) {
-                                // If not dragging, clear the timer to prevent entering drag mode
                                 clearTimeout(longPressTimer);
                                 return;
                             }
                             
-                            // Move the ticket with touch
                             const touch = e.touches[0];
                             const columns = document.querySelectorAll('.status-column');
                             
-                            // Find column under touch position
-                            let targetColumn = null;
                             columns.forEach(column => {
                                 const rect = column.getBoundingClientRect();
                                 if (touch.clientX >= rect.left && 
                                     touch.clientX <= rect.right && 
                                     touch.clientY >= rect.top && 
                                     touch.clientY <= rect.bottom) {
-                                    targetColumn = column;
                                     column.classList.add('bg-primary-50', 'dark:bg-primary-950');
                                 } else {
                                     column.classList.remove('bg-primary-50', 'dark:bg-primary-950');
@@ -297,7 +268,6 @@
                             ticket.classList.remove('opacity-50', 'relative', 'z-30');
                             ticket.style.boxShadow = '';
                             
-                            // Find column under final touch position
                             const touch = e.changedTouches[0];
                             const columns = document.querySelectorAll('.status-column');
                             
@@ -317,13 +287,7 @@
                                 const statusId = targetColumn.getAttribute('data-status-id');
                                 const ticketId = this.draggingTicket;
                                 
-                                const componentId = document.querySelector('[wire\\:id]').getAttribute('wire:id');
-                                if (componentId) {
-                                    Livewire.find(componentId).moveTicket(
-                                        parseInt(ticketId), 
-                                        parseInt(statusId)
-                                    );
-                                }
+                                this.moveTicketToStatus(ticketId, statusId);
                             }
                             
                             this.draggingTicket = null;
@@ -344,7 +308,6 @@
                         });
                     });
                     
-                    // Attach drag and drop listeners to columns
                     const columns = document.querySelectorAll('.status-column');
                     columns.forEach(column => {
                         column.addEventListener('dragover', (e) => {
@@ -365,14 +328,7 @@
                                 const statusId = column.getAttribute('data-status-id');
                                 const ticketId = this.draggingTicket;
                                 this.draggingTicket = null;
-                                
-                                const componentId = document.querySelector('[wire\\:id]').getAttribute('wire:id');
-                                if (componentId) {
-                                    Livewire.find(componentId).moveTicket(
-                                        parseInt(ticketId), 
-                                        parseInt(statusId)
-                                    );
-                                }
+                                this.moveTicketToStatus(ticketId, statusId);
                             }
                         });
                     });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Exception;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ class GoogleController extends Controller
             Auth::login($newUser);
             return redirect()->intended('/admin');
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect('/admin/login')->with('error', 'Something went wrong with Google authentication.');
         }
     }

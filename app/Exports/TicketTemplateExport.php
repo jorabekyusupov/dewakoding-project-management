@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Models\Project;
 use App\Models\TicketStatus;
 use App\Models\TicketPriority;
@@ -88,7 +89,7 @@ class TicketTemplateSheet implements FromArray, WithHeadings, WithStyles, Should
                     'size' => 12,
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => [
                         'argb' => 'FF366092',
                     ],
@@ -152,7 +153,7 @@ class ProjectMembersSheet implements FromArray, WithHeadings, WithStyles, Should
                     'size' => 12,
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => [
                         'argb' => 'FF28A745',
                     ],
@@ -220,7 +221,7 @@ class ReferenceDataSheet implements FromArray, WithHeadings, WithStyles, ShouldA
                     'size' => 12,
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => [
                         'argb' => 'FFDC3545',
                     ],

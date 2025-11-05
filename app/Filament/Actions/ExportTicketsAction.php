@@ -2,10 +2,10 @@
 
 namespace App\Filament\Actions;
 
+use Filament\Schemas\Components\Section;
 use App\Exports\TicketsExport;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Section;
 use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -18,7 +18,7 @@ class ExportTicketsAction
             ->label(__('actions.export_tickets.label'))
             ->icon('heroicon-m-arrow-down-tray')
             ->color('success')
-            ->form([
+            ->schema([
                 Section::make(__('actions.export_tickets.section_title'))
                     ->description(__('actions.export_tickets.section_description'))
                     ->schema([
