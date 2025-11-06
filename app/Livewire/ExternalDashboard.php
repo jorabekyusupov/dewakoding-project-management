@@ -45,10 +45,6 @@ class ExternalDashboard extends Component
     public $newTicketsThisWeek = 0;
     public $completedThisWeek = 0;
 
-
-
-    // Cache gantt data to prevent re-rendering on pagination
-    public $ganttDataCache = null;
     public $staticDataLoaded = false;
 
     protected $paginationTheme = 'tailwind';
@@ -58,32 +54,15 @@ class ExternalDashboard extends Component
     public function refreshData()
     {
         try {
-            // Manual refresh triggered by refresh button only
-            \Log::info('Manual refresh button clicked for project: ' . $this->project->id);
-
-            // Refresh all dynamic data
-            $this->loadDashboardData();
             $this->loadWidgetData();
 
-            // Clear gantt cache to force refresh
-            $this->ganttDataCache = null;
-            $this->staticDataLoaded = false;
-
-            // Force reload of paginated data
             $this->resetPage('tickets');
             $this->resetPage('activities');
 
-            // Dispatch event to refresh gantt chart
-            $this->dispatch('refreshGanttData');
-
-            // Dispatch custom event to maintain tab state (ONLY for button refresh)
             $this->dispatch('data-refreshed');
 
-            // Show success notification
             session()->flash('message', 'Data refreshed successfully!');
-
         } catch (Exception $e) {
-            \Log::error('Error refreshing dashboard data: ' . $e->getMessage());
             session()->flash('error', 'Failed to refresh data. Please try again.');
         }
     }
@@ -111,16 +90,10 @@ class ExternalDashboard extends Component
             ->orderBy('name')
             ->get();
 
-        $this->priorities = TicketPriority::orderBy('name')
-            ->get();
+        $this->priorities = TicketPriority::orderBy('name')->get();
 
         $externalAccess->updateLastAccessed();
 
-        // Ensure default tab is 'tasks'
-        $this->activeTab = 'tasks';
-
-        $this->loadStaticData();
-        $this->loadDashboardData();
         $this->loadWidgetData();
     }
 
@@ -185,18 +158,7 @@ class ExternalDashboard extends Component
             return;
         }
 
-        // Load gantt data once and cache it
-        $this->ganttDataCache = $this->generateGanttData();
-
         $this->staticDataLoaded = true;
-    }
-
-    public function refreshGanttData()
-    {
-        // Force refresh gantt data
-        $this->ganttDataCache = null;
-        $this->ganttDataCache = $this->generateGanttData();
-        $this->dispatch('refreshGanttData');
     }
 
     public function gotoPage($page, $pageName = 'tickets')
@@ -233,7 +195,6 @@ class ExternalDashboard extends Component
 
     public function loadWidgetData()
     {
-        $driver = DB::getDriverName();
         $remainingDays = null;
         if ($this->project->end_date) {
             $remainingDays = (int) Carbon::now()->diffInDays(Carbon::parse($this->project->end_date), false);
@@ -244,162 +205,7 @@ class ExternalDashboard extends Component
             'total_tickets' => $this->project->tickets()->count(),
             'remaining_days' => $remainingDays,
             'progress_percentage' => $this->project->progress_percentage,
-
-            'completed_tickets' => $this->project->tickets()
-                ->whereHas('status', function ($q) {
-                    $q->where('is_completed', true);
-                })->count(),
-
-            'in_progress_tickets' => $this->project->tickets()
-                ->whereHas('status', function ($q) {
-                    $q->whereIn('name', ['In Progress', 'Doing']);
-                })->count(),
-            'overdue_tickets' => $this->project->tickets()
-                ->where('due_date', '<', Carbon::now())
-                ->whereHas('status', function ($q) {
-                    $q->where('is_completed', false);
-                })->count(),
         ];
-
-        $this->newTicketsThisWeek = $this->project->tickets()
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->count();
-
-        $this->completedThisWeek = $this->project->tickets()
-            ->whereHas('status', function ($q) {
-                $q->whereIn('name', ['Completed', 'Done', 'Closed']);
-            })
-            ->where('updated_at', '>=', Carbon::now()->subDays(7))
-            ->count();
-
-
-        $getMonth = $driver === 'pgsql' ? "TO_CHAR(created_at, 'YYYY-MM')" : "DATE_FORMAT(created_at, '%Y-%m')";
-        $monthKey = $driver === 'pgsql' ? "TO_CHAR(created_at, 'YYYY-MM')" : "month";
-
-        $this->monthlyTrend = $this->project->tickets()
-            ->selectRaw("$getMonth as month, COUNT(*) as count")
-            ->where('created_at', '>=', Carbon::now()->subMonths(6))
-            ->groupByRaw($monthKey)
-            ->orderByRaw($monthKey)
-            ->pluck('count', 'month')
-            ->toArray();
-    }
-
-    public function getGanttDataProperty(): array
-    {
-        // Check if gantt data is cached
-        if ($this->ganttDataCache !== null) {
-            return $this->ganttDataCache;
-        }
-
-        // Use global cache for gantt data
-        $cacheKey = 'external_gantt_' . $this->project->id;
-        $this->ganttDataCache = cache()->remember($cacheKey, 300, function () {
-            return $this->generateGanttData();
-        });
-
-        return $this->ganttDataCache;
-    }
-
-    private function generateGanttData(): array
-    {
-        if (!$this->project) {
-            return ['data' => [], 'links' => []];
-        }
-
-        try {
-            $tickets = $this->project->tickets()
-                ->select('id', 'name', 'description', 'uuid', 'due_date', 'start_date', 'ticket_status_id', 'priority_id')
-                ->with(['status:id,name,color', 'priority:id,name,color', 'assignees:id,name,email'])
-                ->whereNotNull('due_date')
-                ->orderBy('due_date')
-                ->get();
-
-            if ($tickets->isEmpty()) {
-                return ['data' => [], 'links' => []];
-            }
-
-            $ganttTasks = [];
-            $now = Carbon::now();
-
-            foreach ($tickets as $ticket) {
-                if (!$ticket->due_date) {
-                    continue;
-                }
-
-                try {
-                    // Use start_date if available, otherwise fall back to 7 days before due_date
-                    $startDate = $ticket->start_date ? Carbon::parse($ticket->start_date) : Carbon::parse($ticket->due_date)->subDays(7);
-                    $endDate = Carbon::parse($ticket->due_date);
-
-                    if ($endDate->lte($startDate)) {
-                        $endDate = $startDate->copy()->addDays(1);
-                    }
-
-                    $progress = $this->getSimpleProgress($ticket->status->name ?? '') / 100;
-                    $isOverdue = $endDate->lt($now) && $progress < 1;
-
-                    // Format dates for modal
-                    $startDateFormatted = $startDate->format('M d, Y');
-                    $dueDateFormatted = $endDate->format('M d, Y');
-
-                    $taskData = [
-                        'id' => (string) $ticket->id,
-                        'text' => $this->truncateName($ticket->name ?? 'Untitled Ticket'),
-                        'start_date' => $startDate->format('d-m-Y H:i'),
-                        'end_date' => $endDate->format('d-m-Y H:i'),
-                        'duration' => max(1, $startDate->diffInDays($endDate)),
-                        'progress' => max(0, min(1, $progress)),
-                        'type' => 'task',
-                        'readonly' => true,
-                        'color' => $isOverdue ? '#ef4444' : ($ticket->status->color ?? '#3b82f6'),
-                        'textColor' => '#ffffff',
-                        'status' => $ticket->status->name ?? 'Unknown',
-                        'is_overdue' => $isOverdue,
-                        // Include full ticket details for modal
-                        'ticket_details' => [
-                            'id' => $ticket->id,
-                            'uuid' => $ticket->uuid,
-                            'name' => $ticket->name,
-                            'description' => $ticket->description ?? 'No description available',
-                            'status' => [
-                                'name' => $ticket->status->name ?? 'Unknown',
-                                'color' => $ticket->status->color ?? '#6B7280'
-                            ],
-                            'priority' => [
-                                'name' => $ticket->priority->name ?? 'Normal',
-                                'color' => $ticket->priority->color ?? '#6B7280'
-                            ],
-                            'start_date' => $startDateFormatted,
-                            'due_date' => $dueDateFormatted,
-                            'progress_percentage' => (int) ($progress * 100),
-                            'is_overdue' => $isOverdue,
-                            'assignees' => $ticket->assignees->map(function ($user) {
-                                return [
-                                    'name' => $user->name,
-                                    'email' => $user->email
-                                ];
-                            })->toArray()
-                        ]
-                    ];
-
-                    $ganttTasks[] = $taskData;
-
-                } catch (Exception $e) {
-                    Log::error('Error processing ticket ' . $ticket->id . ': ' . $e->getMessage());
-                    continue;
-                }
-            }
-
-            return [
-                'data' => $ganttTasks,
-                'links' => []
-            ];
-
-        } catch (Exception $e) {
-            Log::error('Error generating gantt data: ' . $e->getMessage());
-            return ['data' => [], 'links' => []];
-        }
     }
 
     private function truncateName($name, $length = 50): string
@@ -450,7 +256,6 @@ class ExternalDashboard extends Component
     {
         $this->activeTab = $tabName;
 
-        // Force refresh gantt when switching to timeline
         if ($tabName === 'timeline') {
             $this->dispatch('switch-to-timeline');
         }
@@ -520,7 +325,6 @@ class ExternalDashboard extends Component
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
-        // Hard redirect (langsung pindah halaman)
         return redirect()->route('external.login', ['token' => $this->token]);
     }
 }
