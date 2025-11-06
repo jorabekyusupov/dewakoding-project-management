@@ -65,12 +65,12 @@ class UserAuthLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('login_at', 'desc')
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('user'))
                     ->searchable()
                     ->sortable(),
-
                 TextColumn::make('login_at')
                     ->label(__('login_time'))
                     ->dateTime()
