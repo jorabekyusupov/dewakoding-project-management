@@ -20,12 +20,20 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $useTopNav = false;
+        if (Schema::hasTable('settings')) {
+            $navStyle = Setting::query()->where('key', 'navigation_style')->value('value');
+            $useTopNav = $navStyle === 'top';
+        }
+
+        $panel = $panel
             ->spa()
             ->databaseTransactions()
             ->default()
@@ -64,5 +72,11 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification()
             ->profile()
             ->viteTheme('resources/css/filament/admin/theme.css');
+
+        if ($useTopNav) {
+            $panel = $panel->topNavigation();
+        }
+
+        return $panel;
     }
 }
