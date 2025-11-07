@@ -63,11 +63,11 @@ class Leaderboard extends Page implements HasForms
     {
         $users = User::orderBy('name')->get();
         $leaderboardData = [];
-        
+
         foreach ($users as $user) {
             $stats = $this->getUserStats($user->id);
             $totalScore = $this->calculateContributionScore($stats);
-            
+
             if ($totalScore > 0) { // Only include users with contributions
                 $leaderboardData[] = [
                     'user' => $user,
@@ -94,15 +94,17 @@ class Leaderboard extends Page implements HasForms
 
     private function calculateContributionScore(array $stats): int
     {
+
         // Updated weighted scoring system
         $weights = [
             'tickets_created' => 2,    // Updated: Tickets created = 2 points
             'status_changes' => 5,     // Updated: Status changes = 5 points
             'comments_made' => 2,      // Comments remain 2 points
-            'active_days' => 1         // Consistency bonus remains 1 point
+            'active_days' => 1,
+            'regression_penalty' => 5   // Penalty per regression
         ];
 
-        $regressionPenalty = ($stats['status_regressions'] ?? 0) * 6;
+        $regressionPenalty = $stats['regression_penalty'] ?? (($stats['status_regressions'] ?? 0) * 2);
 
         return (
             ($stats['tickets_created'] * $weights['tickets_created']) +
@@ -149,7 +151,7 @@ class Leaderboard extends Page implements HasForms
         $dateRange = $this->getDateRangeFromTimeRange();
         $startDate = $dateRange['start'];
         $endDate = $dateRange['end'];
-        
+
         try {
             $rangeStart = $startDate->copy()->startOfDay()->utc();
             $rangeEnd = $endDate->copy()->endOfDay()->utc();
@@ -161,8 +163,9 @@ class Leaderboard extends Page implements HasForms
                 ->orderBy('created_at')
                 ->get(['id', 'ticket_id', 'user_id', 'ticket_status_id', 'created_at']);
 
-            $statusChangesCount = $statusHistory->count();
+            $rawStatusChanges = $statusHistory->count();
             $statusRegressions = $this->calculateStatusRegressions($statusHistory);
+            $statusChangesCount = max($rawStatusChanges - $statusRegressions, 0);
 
             return [
                 'tickets_created' => Ticket::where('created_by', $userId)
@@ -194,35 +197,35 @@ class Leaderboard extends Page implements HasForms
         $dateRange = $this->getDateRangeFromTimeRange();
         $startDate = $dateRange['start'];
         $endDate = $dateRange['end'];
-        
+
         // Get unique dates where user had activity - simplified approach
         $ticketDates = Ticket::where('created_by', $userId)
             ->whereBetween('created_at', [
-                $startDate->startOfDay()->utc(), 
+                $startDate->startOfDay()->utc(),
                 $endDate->endOfDay()->utc()
             ])
             ->selectRaw('DATE(created_at) as activity_date')
             ->distinct()
             ->pluck('activity_date');
-            
+
         $historyDates = TicketHistory::where('user_id', $userId)
             ->whereBetween('created_at', [
-                $startDate->startOfDay()->utc(), 
+                $startDate->startOfDay()->utc(),
                 $endDate->endOfDay()->utc()
             ])
             ->selectRaw('DATE(created_at) as activity_date')
             ->distinct()
             ->pluck('activity_date');
-            
+
         $commentDates = TicketComment::where('user_id', $userId)
             ->whereBetween('created_at', [
-                $startDate->startOfDay()->utc(), 
+                $startDate->startOfDay()->utc(),
                 $endDate->endOfDay()->utc()
             ])
             ->selectRaw('DATE(created_at) as activity_date')
             ->distinct()
             ->pluck('activity_date');
-            
+
         // Merge and count unique dates
         return $ticketDates->merge($historyDates)
             ->merge($commentDates)
@@ -233,7 +236,7 @@ class Leaderboard extends Page implements HasForms
     private function getDateRangeFromTimeRange(): array
     {
         $endDate = Carbon::now(config('app.timezone'));
-        
+
         return match($this->timeRange) {
             '7days' => [
                 'start' => $endDate->copy()->subDays(6), // 7 days including today
