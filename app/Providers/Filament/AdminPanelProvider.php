@@ -26,15 +26,22 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $useTopNav = false;
+        if (Schema::hasTable('settings')) {
+            $navStyle = Setting::query()->where('key', 'navigation_style')->value('value');
+            $useTopNav = $navStyle === 'top';
+        }
         FilamentAsset::register([
             Css::make('custom', asset('css/filament/theme/theme.css')),
         ]);
-        return $panel
+        $panel = $panel
             ->spa()
             ->databaseTransactions()
             ->default()
@@ -78,6 +85,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->passwordReset()
             ->emailVerification()
+            ->profile()
             ->viteTheme('resources/css/filament/admin/theme.css');
+
+        if ($useTopNav) {
+            $panel = $panel->topNavigation();
+        }
+
+        return $panel;
     }
 }
