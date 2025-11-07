@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\UserResource\Pages\EditProfile;

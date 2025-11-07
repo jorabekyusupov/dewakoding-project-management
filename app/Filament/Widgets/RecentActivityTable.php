@@ -19,12 +19,12 @@ class RecentActivityTable extends BaseWidget
     use HasWidgetShield;
 
     protected static ?string $heading = null;
-    
+
     protected int | string | array $columnSpan = [
         'md' => 2,
         'xl' => 1,
     ];
-    
+
     protected static ?int $sort = 7;
 
     protected function getHeading(): ?string
@@ -56,7 +56,7 @@ class RecentActivityTable extends BaseWidget
                     })
                     ->description(function (TicketHistory $record): string {
                         $isToday = $record->created_at->isToday();
-                        $time = $isToday 
+                        $time = $isToday
                             ? $record->created_at->format('H:i')
                             : $record->created_at->format('M d, H:i');
                         $project = $record->ticket->project->name ?? __('No Project');
@@ -72,7 +72,7 @@ class RecentActivityTable extends BaseWidget
                     ->alignEnd()
                     ->color(fn (TicketHistory $record): string => match($record->status->name ?? '') {
                         'To Do', 'Backlog' => 'gray',
-                        'In Progress', 'Doing' => 'warning', 
+                        'In Progress', 'Doing' => 'warning',
                         'Review', 'Testing' => 'info',
                         'Done', 'Completed' => 'success',
                         'Cancelled', 'Blocked' => 'danger',
@@ -127,12 +127,12 @@ class RecentActivityTable extends BaseWidget
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->size('sm')
                     ->tooltip(__('widgets.recent_activity.actions.open_ticket'))
-                    ->url(fn (TicketHistory $record): string => 
+                    ->url(fn (TicketHistory $record): string =>
                         route('filament.admin.resources.tickets.view', $record->ticket)
                     )
                     ->openUrlInNewTab()
             ])
-            ->recordUrl(fn (TicketHistory $record) => 
+            ->recordUrl(fn (TicketHistory $record) =>
                 route('filament.admin.resources.tickets.view', $record->ticket)
             )
             ->paginated([5, 25, 50])
