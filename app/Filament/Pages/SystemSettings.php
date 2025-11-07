@@ -10,6 +10,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Schemas\Schema;
 use BackedEnum;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 use Filament\Support\Icons\Heroicon;
 
@@ -19,12 +20,29 @@ class SystemSettings extends Page implements HasForms
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Cog6Tooth;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'settings';
 
     protected static ?string $title = 'System Settings';
     protected string $view = 'filament.pages.system-settings';
 
     public ?array $data = [];
+
+    /**
+     * @return string|UnitEnum|null
+     */
+    public static function getNavigationGroup(): UnitEnum|string|null
+    {
+        return __('navigation.settings');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('sytem_settings');
+    }
+    public function getTitle(): string|Htmlable
+    {
+        return __('sytem_settings');
+    }
 
     public function mount(): void
     {
