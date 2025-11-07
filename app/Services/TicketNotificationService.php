@@ -6,6 +6,8 @@ use App\Library\Bot\InfoBot;
 use App\Models\Project;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\TicketComment;
+use Illuminate\Support\Str;
 
 class TicketNotificationService
 {
@@ -54,6 +56,32 @@ class TicketNotificationService
 
         $this->notifyProjectAboutStatusChange($ticket, $assignees, $projectChatId, $threadId, $oldStatus, $newStatus);
         $this->notifyAssigneesAboutStatusChange($ticket, $assigneesChatIDs, $newStatus);
+    }
+
+    public function notifyCommentAdded(TicketComment $comment): void
+    {
+        $comment->loadMissing(['user', 'ticket.project', 'ticket.assignees', 'ticket.priority', 'ticket.creator']);
+
+        $ticket = $comment->ticket;
+
+        if (! $ticket) {
+            return;
+        }
+
+        $projectChatId = $ticket->project?->chat_id;
+        $threadId = $ticket->project?->thread_id;
+        $authorName = $comment->user?->name ?? 'Неизвестно';
+        $commentPreview = $this->buildCommentPreview($comment);
+
+        $assigneesChatIDs = $ticket->assignees
+            ->where('id', '!=', $comment->user_id)
+            ->pluck('chat_id')
+            ->filter()
+            ->all();
+
+
+        $this->notifyProjectAboutComment($ticket, $authorName, $commentPreview, $projectChatId, $threadId);
+        $this->notifyAssigneesAboutComment($ticket, $authorName, $commentPreview, $assigneesChatIDs);
     }
 
     private function notifyProjectAboutCreatedTicket(Ticket $ticket, string $assignees, ?string $projectChatId, ?string $threadId): void
@@ -129,6 +157,57 @@ class TicketNotificationService
 
             $this->infoBot->send($assigneesChatID, $text);
         }
+    }
+
+    private function notifyProjectAboutComment(
+        Ticket $ticket,
+        string $authorName,
+        string $commentPreview,
+        ?string $projectChatId,
+        ?string $threadId
+    ): void {
+        if (empty($projectChatId)) {
+            return;
+        }
+
+        $text = '💬 Новый комментарий в задаче: ' . $ticket->name . PHP_EOL .
+            '👤 Автор: ' . $authorName . PHP_EOL .
+            '📝 Комментарий: ' . $commentPreview . PHP_EOL .
+            '📎 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
+
+        $this->infoBot->send($projectChatId, $text, $threadId);
+    }
+
+    private function notifyAssigneesAboutComment(
+        Ticket $ticket,
+        string $authorName,
+        string $commentPreview,
+        array $assigneesChatIDs
+    ): void {
+        if (empty($assigneesChatIDs)) {
+            return;
+        }
+
+        foreach ($assigneesChatIDs as $assigneesChatID) {
+            $text = '💬 В задаче ' . $ticket->name . ' новый комментарий.' . PHP_EOL .
+                '👤 Автор: ' . $authorName . PHP_EOL .
+                '📝 ' . $commentPreview . PHP_EOL .
+                '📎 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
+
+            $this->infoBot->send($assigneesChatID, $text);
+        }
+    }
+
+    private function buildCommentPreview(TicketComment $comment): string
+    {
+        $plain = trim(strip_tags($comment->comment ?? ''));
+        $plain = preg_replace('/\s+/u', ' ', $plain ?? '');
+
+        if ($plain === '') {
+            $plain = 'Без текста';
+        }
+
+        return Str::limit($plain, 200);
     }
 
     public function notifyProjectMemberAdded(Project $project, User $member): void

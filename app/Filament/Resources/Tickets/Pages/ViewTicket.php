@@ -11,6 +11,7 @@ use App\Filament\Pages\ProjectBoard;
 use App\Filament\Resources\Tickets\TicketResource;
 use App\Models\Ticket;
 use App\Models\TicketComment;
+use App\Services\TicketNotificationService;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -66,6 +67,8 @@ class ViewTicket extends ViewRecord
                         'user_id' => auth()->id(),
                         'comment' => $data['comment']
                     ]);
+
+                    app(TicketNotificationService::class)->notifyCommentAdded($comment);
 
                     auth()->user()->notifications()
                         ->where('data->ticket_id', $ticket->id)
