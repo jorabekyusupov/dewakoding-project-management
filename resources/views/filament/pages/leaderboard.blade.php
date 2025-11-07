@@ -49,6 +49,10 @@
                 @endphp
 
                 @forelse($leaderboardData as $entry)
+                    @php
+                        $regressionPenalty = $entry['stats']['regression_penalty'] ?? 0;
+                        $statusRegressions = $entry['stats']['status_regressions'] ?? 0;
+                    @endphp
                     <div class="mb-4 last:mb-0">
                         <!-- Mobile-First Responsive Card Layout -->
                         <div class="rounded-lg bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-800 dark:ring-white/10 hover:shadow-md transition-shadow">
@@ -118,6 +122,13 @@
                                             {{ number_format($entry['stats']['active_days']) }}
                                         </p>
                                         <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">{{ __('pages.leaderboard.stats.active_days') }}</p>
+                                    </div>
+                                    <div class="col-span-2 text-center p-3 bg-red-50 dark:bg-red-500/10 rounded-lg">
+                                        <p class="text-lg font-bold text-red-600 dark:text-red-400">
+                                            {{ $regressionPenalty > 0 ? '-' : '' }}{{ number_format($regressionPenalty) }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-300 font-medium">{{ __('pages.leaderboard.stats.regression_penalty') }}</p>
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('pages.leaderboard.stats.regressions_count', ['count' => number_format($statusRegressions)]) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -189,6 +200,13 @@
                                         </p>
                                         <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">{{ __('pages.leaderboard.stats.active_days') }}</p>
                                     </div>
+                                    <div class="text-center">
+                                        <p class="text-xl font-bold text-red-600 dark:text-red-400">
+                                            {{ $regressionPenalty > 0 ? '-' : '' }}{{ number_format($regressionPenalty) }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">{{ __('pages.leaderboard.stats.regression_penalty') }}</p>
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('pages.leaderboard.stats.regressions_count', ['count' => number_format($statusRegressions)]) }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -225,6 +243,9 @@
                         {{ __('pages.leaderboard.scoring.formula') }}
                     </p>
                 </div>
+                <p class="mt-3 text-sm text-red-600 dark:text-red-400">
+                    {{ __('pages.leaderboard.scoring.penalty_hint') }}
+                </p>
             </div>
         </div>
     </div>

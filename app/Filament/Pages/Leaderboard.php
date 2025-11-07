@@ -102,12 +102,46 @@ class Leaderboard extends Page implements HasForms
             'active_days' => 1         // Consistency bonus remains 1 point
         ];
 
+        $regressionPenalty = ($stats['status_regressions'] ?? 0) * 6;
+
         return (
             ($stats['tickets_created'] * $weights['tickets_created']) +
             ($stats['status_changes'] * $weights['status_changes']) +
             ($stats['comments_made'] * $weights['comments_made']) +
-            ($stats['active_days'] * $weights['active_days'])
+            ($stats['active_days'] * $weights['active_days']) -
+            $regressionPenalty
         );
+    }
+
+    private function calculateStatusRegressions(Collection $historyEntries): int
+    {
+        if ($historyEntries->isEmpty()) {
+            return 0;
+        }
+
+        $regressions = 0;
+
+        $historyEntries
+            ->groupBy('ticket_id')
+            ->each(function (Collection $ticketHistory) use (&$regressions) {
+                $previousSortOrder = null;
+
+                foreach ($ticketHistory->sortBy('created_at') as $history) {
+                    $currentSortOrder = optional($history->status)->sort_order;
+
+                    if ($currentSortOrder === null) {
+                        continue;
+                    }
+
+                    if ($previousSortOrder !== null && $currentSortOrder < $previousSortOrder) {
+                        $regressions++;
+                    }
+
+                    $previousSortOrder = $currentSortOrder;
+                }
+            });
+
+        return $regressions;
     }
 
     private function getUserStats(int $userId): array
@@ -117,24 +151,28 @@ class Leaderboard extends Page implements HasForms
         $endDate = $dateRange['end'];
         
         try {
+            $rangeStart = $startDate->copy()->startOfDay()->utc();
+            $rangeEnd = $endDate->copy()->endOfDay()->utc();
+
+            $statusHistory = TicketHistory::with('status:id,sort_order')
+                ->where('user_id', $userId)
+                ->whereBetween('created_at', [$rangeStart, $rangeEnd])
+                ->orderBy('ticket_id')
+                ->orderBy('created_at')
+                ->get(['id', 'ticket_id', 'user_id', 'ticket_status_id', 'created_at']);
+
+            $statusChangesCount = $statusHistory->count();
+            $statusRegressions = $this->calculateStatusRegressions($statusHistory);
+
             return [
                 'tickets_created' => Ticket::where('created_by', $userId)
-                    ->whereBetween('created_at', [
-                        $startDate->startOfDay()->utc(), 
-                        $endDate->endOfDay()->utc()
-                    ])
+                    ->whereBetween('created_at', [$rangeStart, $rangeEnd])
                     ->count(),
-                'status_changes' => TicketHistory::where('user_id', $userId)
-                    ->whereBetween('created_at', [
-                        $startDate->startOfDay()->utc(), 
-                        $endDate->endOfDay()->utc()
-                    ])
-                    ->count(),
+                'status_changes' => $statusChangesCount,
+                'status_regressions' => $statusRegressions,
+                'regression_penalty' => $statusRegressions * 6,
                 'comments_made' => TicketComment::where('user_id', $userId)
-                    ->whereBetween('created_at', [
-                        $startDate->startOfDay()->utc(), 
-                        $endDate->endOfDay()->utc()
-                    ])
+                    ->whereBetween('created_at', [$rangeStart, $rangeEnd])
                     ->count(),
                 'active_days' => $this->getUserActiveDays($userId)
             ];
@@ -143,6 +181,8 @@ class Leaderboard extends Page implements HasForms
             return [
                 'tickets_created' => 0,
                 'status_changes' => 0,
+                'status_regressions' => 0,
+                'regression_penalty' => 0,
                 'comments_made' => 0,
                 'active_days' => 0
             ];
