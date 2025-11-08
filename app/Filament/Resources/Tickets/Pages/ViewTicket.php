@@ -26,68 +26,15 @@ class ViewTicket extends ViewRecord
 
     public ?int $editingCommentId = null;
 
-    protected function getHeaderActions(): array
+    public function editComment(int $commentId): void
     {
-        $ticket = $this->getRecord();
-        $project = $ticket->project;
-        
-        $canComment = $project->members()->where('users.id', auth()->id())->exists();
+        $comment = TicketComment::find($commentId);
 
-        return [
-            EditAction::make()
-                ->visible(function () {
-                    $ticket = $this->getRecord();
-
-                    return auth()->user()->hasRole(['super_admin'])
-                        || $ticket->created_by === auth()->id()
-                        || $ticket->assignees()->where('users.id', auth()->id())->exists();
-                }),
-
-            Action::make('addComment')
-                ->label('Add Comment')
-                ->icon('heroicon-o-chat-bubble-left-right')
-                ->color('success')
-                ->schema([
-                    RichEditor::make('comment')
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    $ticket = $this->getRecord();
-
-                    $comment = $ticket->comments()->create([
-                        'user_id' => auth()->id(),
-                        'comment' => $data['comment']
-                    ]);
-
-                    auth()->user()->notifications()
-                        ->where('data->ticket_id', $ticket->id)
-                        ->whereNull('read_at')
-                        ->update(['read_at' => now()]);
-
-                    Notification::make()
-                        ->title('Comment added successfully')
-                        ->success()
-                        ->send();
-                })
-                ->visible($canComment),
-
-            Action::make('back')
-                ->label('Back to Board')
-                ->color('gray')
-                ->url(fn () => ProjectBoard::getUrl(['project_id' => $this->record->project_id])),
-        ];
-    }
-
-    public function handleEditComment($id)
-    {
-        $comment = TicketComment::find($id);
-
-        if (! $comment) {
+        if (!$comment) {
             Notification::make()
                 ->title('Comment not found')
                 ->danger()
                 ->send();
-
             return;
         }
 
@@ -96,24 +43,22 @@ class ViewTicket extends ViewRecord
                 ->title('You do not have permission to edit this comment')
                 ->danger()
                 ->send();
-
             return;
         }
 
-        $this->editingCommentId = $id;
-        $this->mountAction('editComment', ['commentId' => $id]);
+        $this->editingCommentId = $commentId;
+        $this->mountAction('editCommentAction', ['commentId' => $commentId]);
     }
 
-    public function handleDeleteComment($id)
+    public function deleteComment(int $commentId): void
     {
-        $comment = TicketComment::find($id);
+        $comment = TicketComment::find($commentId);
 
-        if (! $comment) {
+        if (!$comment) {
             Notification::make()
                 ->title('Comment not found')
                 ->danger()
                 ->send();
-
             return;
         }
 
@@ -122,7 +67,6 @@ class ViewTicket extends ViewRecord
                 ->title('You do not have permission to delete this comment')
                 ->danger()
                 ->send();
-
             return;
         }
 
@@ -133,7 +77,26 @@ class ViewTicket extends ViewRecord
             ->success()
             ->send();
 
-        $this->redirect($this->getResource()::getUrl('view', ['record' => $this->getRecord()]));
+        $this->dispatch('$refresh');
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make()
+                ->visible(function () {
+                    $ticket = $this->getRecord();
+
+                    return auth()->user()->hasRole(['super_admin'])
+                        || $ticket->created_by === auth()->id()
+                        || $ticket->assignees()->where('users.id', auth()->id())->exists();
+                }),
+
+            Action::make('back')
+                ->label('Back to Board')
+                ->color('gray')
+                ->url(fn() => ProjectBoard::getUrl(['project_id' => $this->record->project_id])),
+        ];
     }
 
     public function infolist(Schema $schema): Schema
@@ -169,7 +132,7 @@ class ViewTicket extends ViewRecord
                                 TextEntry::make('status.name')
                                     ->label('Status')
                                     ->badge()
-                                    ->color(fn ($record) => $record->status?->color ?? 'gray'),
+                                    ->color(fn($record) => $record->status?->color ?? 'gray'),
 
                                 TextEntry::make('assignees.name')
                                     ->label('Assigned To')
@@ -187,7 +150,7 @@ class ViewTicket extends ViewRecord
                                     ->label('Due Date')
                                     ->date('d M Y')
                                     ->icon('heroicon-o-calendar')
-                                    ->color(fn ($record) => $record->due_date && $record->due_date->isPast() ? 'danger' : 'success'),
+                                    ->color(fn($record) => $record->due_date && $record->due_date->isPast() ? 'danger' : 'success'),
                             ]),
                     ]),
 
@@ -215,7 +178,7 @@ class ViewTicket extends ViewRecord
 
                                 return collect();
                             })
-                            ->view('filament.resources.ticket-resource.latest-comments')
+                            ->view('filament.resources.ticket-resource.comments-section')
                             ->columnSpanFull(),
                     ])
                     ->columnSpanFull()
@@ -258,95 +221,5 @@ class ViewTicket extends ViewRecord
                             ]),
                     ]),
             ]);
-    }
-
-    protected function getActions(): array
-    {
-        return [
-            Action::make('editComment')
-                ->label('Edit Comment')
-                ->mountUsing(function (Schema $schema, array $arguments) {
-                    $commentId = $arguments['commentId'] ?? null;
-
-                    if (! $commentId) {
-                        return;
-                    }
-
-                    $comment = TicketComment::find($commentId);
-
-                    if (! $comment) {
-                        return;
-                    }
-
-                    $schema->fill([
-                        'commentId' => $comment->id,
-                        'comment' => $comment->comment,
-                    ]);
-                })
-                ->schema([
-                    Hidden::make('commentId')
-                        ->required(),
-                    RichEditor::make('comment')
-                        ->label('Comment')
-                        ->toolbarButtons([
-                            'blockquote',
-                            'bold',
-                            'bulletList',
-                            'codeBlock',
-                            'h2',
-                            'h3',
-                            'italic',
-                            'link',
-                            'orderedList',
-                            'redo',
-                            'strike',
-                            'underline',
-                            'undo',
-                        ])
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    $comment = TicketComment::find($data['commentId']);
-
-                    if (! $comment) {
-                        Notification::make()
-                            ->title('Comment not found')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    // Check permissions
-                    if (! auth()->user()->can('update', $comment)) {
-                        Notification::make()
-                            ->title('You do not have permission to edit this comment')
-                            ->danger()
-                            ->send();
-
-                        return;
-                    }
-
-                    $comment->update([
-                        'comment' => $data['comment'],
-                    ]);
-
-                    Notification::make()
-                        ->title('Comment updated successfully')
-                        ->success()
-                        ->send();
-
-                    // Reset editingCommentId
-                    $this->editingCommentId = null;
-
-                    // Refresh the page
-                    $this->redirect($this->getResource()::getUrl('view', ['record' => $this->getRecord()]));
-                })
-                ->modalWidth('lg')
-                ->modalHeading('Edit Comment')
-                ->modalSubmitActionLabel('Update')
-                ->color('success')
-                ->icon('heroicon-o-pencil'),
-        ];
     }
 }
