@@ -106,13 +106,12 @@ class NotificationService
 
     public function notifyProjectAssignment(Project $project, User $assignedUser, User $assignedBy): void
     {
-        // Create in-app notification
         try {
             Notification::create([
                 'user_id' => $assignedUser->id,
                 'type' => 'project_assigned',
-                'title' => 'Ditambahkan ke Project',
-                'message' => "Anda telah ditambahkan ke project '{$project->name}' oleh {$assignedBy->name}",
+                'title' => 'Added to Project',
+                'message' => "You have been added to project '{$project->name}' by {$assignedBy->name}",
                 'data' => [
                     'project_id' => $project->id,
                     'project_name' => $project->name,
@@ -127,7 +126,6 @@ class NotificationService
             ]);
         }
 
-        // Send email notification
         try {
             $mail = new ProjectAssignmentNotification($project, $assignedUser, $assignedBy);
             Mail::to($assignedUser->email)->send($mail);
@@ -144,12 +142,11 @@ class NotificationService
 
     public function notifyProjectRemoval(Project $project, User $removedUser, User $removedBy): void
     {
-        // Create in-app notification
         Notification::create([
             'user_id' => $removedUser->id,
             'type' => 'project_removed',
-            'title' => 'Dihapus dari Project',
-            'message' => "Anda telah dihapus dari project '{$project->name}' oleh {$removedBy->name}",
+            'title' => 'Removed from Project',
+            'message' => "You have been removed from project '{$project->name}' by {$removedBy->name}",
             'data' => [
                 'project_id' => $project->id,
                 'project_name' => $project->name,

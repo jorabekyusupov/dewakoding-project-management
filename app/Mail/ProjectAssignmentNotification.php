@@ -25,7 +25,7 @@ class ProjectAssignmentNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Anda telah ditambahkan ke project: {$this->project->name}",
+            subject: "You have been added to the project: {$this->project->name}",
         );
     }
 
