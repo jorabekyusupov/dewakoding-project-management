@@ -11,9 +11,9 @@ use Livewire\Attributes\On;
 
 class EpicsOverview extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-flag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-flag';
     protected string $view = 'filament.pages.epics-overview';
-    protected static string | \UnitEnum | null $navigationGroup = 'Project Management';
+    protected static string|\UnitEnum|null $navigationGroup = 'Project Management';
     protected static ?string $navigationLabel = 'Epics';
     protected static ?string $title = 'Epics Overview';
     protected static ?int $navigationSort = 7;
@@ -32,6 +32,8 @@ class EpicsOverview extends Page
     public ?int $selectedProjectId = null;
 
     public Collection $availableProjects;
+
+    public string $searchProject = '';
 
     public function mount($project_id = null): void
     {
@@ -57,10 +59,29 @@ class EpicsOverview extends Page
         $user = auth()->user();
 
         if ($user->hasRole('super_admin')) {
-            $this->availableProjects = Project::orderBy('name')->get();
+            $this->availableProjects = Project::orderByRaw('pinned_date IS NULL')
+                ->orderBy('pinned_date', 'desc')
+                ->orderBy('name')
+                ->get();
         } else {
-            $this->availableProjects = $user->projects()->orderBy('name')->get();
+            $this->availableProjects = $user->projects()
+                ->orderByRaw('pinned_date IS NULL')
+                ->orderBy('pinned_date', 'desc')
+                ->orderBy('name')
+                ->get();
         }
+    }
+
+    public function getFilteredProjectsProperty(): Collection
+    {
+        if (empty($this->searchProject)) {
+            return $this->availableProjects;
+        }
+
+        return $this->availableProjects->filter(function ($project) {
+            return str_contains(strtolower($project->name), strtolower($this->searchProject)) ||
+                str_contains(strtolower($project->ticket_prefix ?? ''), strtolower($this->searchProject));
+        });
     }
 
     public function loadEpics(): void
@@ -114,7 +135,7 @@ class EpicsOverview extends Page
     {
         $tickets = $epic->tickets;
         $totalTickets = $tickets->count();
-        
+
         if ($totalTickets === 0) {
             return [
                 'total' => 0,
@@ -153,7 +174,7 @@ class EpicsOverview extends Page
         }
 
         $names = $ticket->assignees->pluck('name')->toArray();
-        
+
         if (count($names) <= 2) {
             return implode(', ', $names);
         }

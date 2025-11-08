@@ -20,11 +20,11 @@ use Filament\Forms\Components\CheckboxList;
 
 class ProjectBoard extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-view-columns';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-view-columns';
     protected string $view = 'filament.pages.project-board';
     protected static ?string $title = 'Project Board';
     protected static ?string $navigationLabel = 'Project Board';
-    protected static string | \UnitEnum | null $navigationGroup = 'Project Management';
+    protected static string|\UnitEnum|null $navigationGroup = 'Project Management';
     protected static ?int $navigationSort = 4;
 
     public function getSubheading(): ?string
@@ -42,19 +42,28 @@ class ProjectBoard extends Page
     public ?Ticket $selectedTicket = null;
 
     public ?int $selectedProjectId = null;
-    
+
     public array $sortOrders = [];
-    
+
     public array $selectedUserIds = [];
-    
+
     public Collection $projectUsers;
+
+    public string $searchProject = '';
 
     public function mount($project_id = null): void
     {
         if (auth()->user()->hasRole(['super_admin'])) {
-            $this->projects = Project::all();
+            $this->projects = Project::orderByRaw('pinned_date IS NULL')
+                ->orderBy('pinned_date', 'desc')
+                ->orderBy('name')
+                ->get();
         } else {
-            $this->projects = auth()->user()->projects;
+            $this->projects = auth()->user()->projects()
+                ->orderByRaw('pinned_date IS NULL')
+                ->orderBy('pinned_date', 'desc')
+                ->orderBy('name')
+                ->get();
         }
 
         if ($project_id) {
@@ -66,6 +75,18 @@ class ProjectBoard extends Page
             $this->ticketStatuses = collect();
             $this->projectUsers = collect();
         }
+    }
+
+    public function getFilteredProjectsProperty(): Collection
+    {
+        if (empty($this->searchProject)) {
+            return $this->projects;
+        }
+
+        return $this->projects->filter(function ($project) {
+            return str_contains(strtolower($project->name), strtolower($this->searchProject)) ||
+                str_contains(strtolower($project->ticket_prefix ?? ''), strtolower($this->searchProject));
+        });
     }
 
     public function updatedSelectedProjectId($value): void
@@ -104,12 +125,12 @@ class ProjectBoard extends Page
 
     public function loadTicketStatuses(): void
     {
-        if (! $this->selectedProject) {
+        if (!$this->selectedProject) {
             $this->ticketStatuses = collect();
-    
+
             return;
         }
-    
+
         $this->ticketStatuses = $this->selectedProject->ticketStatuses()
             ->with([
                 'tickets' => function ($query) {
@@ -119,33 +140,33 @@ class ProjectBoard extends Page
                         'priority:id,name,color',
                         'creator:id,name'
                     ])
-                    ->select('id', 'project_id', 'ticket_status_id', 'priority_id', 'name', 'description', 'uuid', 'due_date', 'created_at', 'updated_at', 'created_by')
-                    ->when(!empty($this->selectedUserIds), function ($query) {
-                        $query->whereHas('assignees', function ($assigneeQuery) {
-                            $assigneeQuery->whereIn('users.id', $this->selectedUserIds);
-                        });
-                    })
-                    ->orderBy('id', 'asc');
+                        ->select('id', 'project_id', 'ticket_status_id', 'priority_id', 'name', 'description', 'uuid', 'due_date', 'created_at', 'updated_at', 'created_by')
+                        ->when(!empty($this->selectedUserIds), function ($query) {
+                            $query->whereHas('assignees', function ($assigneeQuery) {
+                                $assigneeQuery->whereIn('users.id', $this->selectedUserIds);
+                            });
+                        })
+                        ->orderBy('id', 'asc');
                 }
             ])
             ->select('id', 'project_id', 'name', 'color', 'sort_order', 'is_completed')
             ->orderBy('sort_order')
             ->get();
-            
+
         $this->ticketStatuses->each(function ($status) {
             $sortOrder = $this->sortOrders[$status->id] ?? 'date_created_newest';
             $status->tickets = $this->applySorting($status->tickets, $sortOrder);
         });
-    
+
     }
-    
+
     public function loadProjectUsers(): void
     {
-        if (! $this->selectedProject) {
+        if (!$this->selectedProject) {
             $this->projectUsers = collect();
             return;
         }
-        
+
         // Get only users who are assigned to tickets in this project
         $ticketAssigneeIds = $this->selectedProject->tickets()
             ->with('assignees')
@@ -155,29 +176,29 @@ class ProjectBoard extends Page
             })
             ->unique()
             ->filter();
-            
+
         $this->projectUsers = User::whereIn('id', $ticketAssigneeIds)
             ->orderBy('name')
             ->get();
     }
-    
+
     public function updatedSelectedUserIds(): void
     {
         $this->loadTicketStatuses();
     }
-    
+
     public function clearUserFilter(): void
     {
         $this->selectedUserIds = [];
         $this->loadTicketStatuses();
     }
-    
+
     public function setSortOrder($statusId, $sortOrder)
     {
         $this->sortOrders[$statusId] = $sortOrder;
         $this->loadTicketStatuses();
     }
-    
+
     private function applySorting($tickets, $sortOrder)
     {
         switch ($sortOrder) {
@@ -243,7 +264,7 @@ class ProjectBoard extends Page
     {
         $ticket = Ticket::with(['assignees', 'status', 'project', 'priority'])->find($ticketId);
 
-        if (! $ticket) {
+        if (!$ticket) {
             Notification::make()
                 ->title('Ticket Not Found')
                 ->danger()
@@ -252,7 +273,7 @@ class ProjectBoard extends Page
             return;
         }
 
-        
+
         $url = TicketResource::getUrl('view', ['record' => $ticketId]);
         $this->js("window.open('{$url}', '_blank')");
     }
@@ -266,7 +287,7 @@ class ProjectBoard extends Page
     {
         $ticket = Ticket::find($ticketId);
 
-        if (! $this->canEditTicket($ticket)) {
+        if (!$this->canEditTicket($ticket)) {
             Notification::make()
                 ->title('Permission Denied')
                 ->body('You do not have permission to edit this ticket.')
@@ -278,36 +299,35 @@ class ProjectBoard extends Page
 
         $this->redirect(TicketResource::getUrl('edit', ['record' => $ticketId]));
     }
-
     protected function getHeaderActions(): array
     {
         return [
             Action::make('new_ticket')
                 ->label('New Ticket')
                 ->icon('heroicon-m-plus')
-                ->visible(fn () => $this->selectedProject !== null && auth()->user()->can('create_ticket'))
-                ->url(fn (): string => TicketResource::getUrl('create', [
+                ->visible(fn() => $this->selectedProject !== null && auth()->user()->can('create_ticket'))
+                ->url(fn(): string => TicketResource::getUrl('create', [
                     'project_id' => $this->selectedProject?->id,
                     'ticket_status_id' => $this->selectedProject?->ticketStatuses->first()?->id,
                 ]))
                 ->openUrlInNewTab(),
-    
+
             Action::make('refresh_board')
                 ->label('Refresh Board')
                 ->icon('heroicon-m-arrow-path')
                 ->action('refreshBoard')
                 ->color('warning'),
             ExportTicketsAction::make()
-                ->visible(fn () => $this->selectedProject !== null && auth()->user()->hasRole(['super_admin'])),
-            
+                ->visible(fn() => $this->selectedProject !== null && auth()->user()->hasRole(['super_admin'])),
+
             Action::make('filter_users')
                 ->label('Filter by User')
                 ->icon('heroicon-m-user-group')
-                ->visible(fn () => $this->selectedProject !== null && $this->projectUsers->isNotEmpty())
+                ->visible(fn() => $this->selectedProject !== null && $this->projectUsers->isNotEmpty())
                 ->schema([
                     CheckboxList::make('selectedUserIds')
                         ->label('Select Users to Filter')
-                        ->options(fn () => $this->projectUsers->pluck('name', 'id')->toArray())
+                        ->options(fn() => $this->projectUsers->pluck('name', 'id')->toArray())
                         ->columns(2)
                         ->searchable()
                         ->bulkToggleable()
@@ -315,7 +335,7 @@ class ProjectBoard extends Page
                 ->action(function (array $data) {
                     $this->selectedUserIds = $data['selectedUserIds'] ?? [];
                     $this->loadTicketStatuses();
-                    
+
                     $userCount = count($this->selectedUserIds);
                     if ($userCount > 0) {
                         Notification::make()
@@ -341,11 +361,11 @@ class ProjectBoard extends Page
 
     private function canViewTicket(?Ticket $ticket): bool
     {
-        if (! $ticket) {
+        if (!$ticket) {
             return false;
         }
 
-        if (! auth()->user()->can('view_ticket')) {
+        if (!auth()->user()->can('view_ticket')) {
             return false;
         }
 
@@ -356,12 +376,12 @@ class ProjectBoard extends Page
 
     private function canEditTicket(?Ticket $ticket): bool
     {
-        if (! $ticket) {
+        if (!$ticket) {
             return false;
         }
 
         // Check Filament Shield permission for updating tickets
-        if (! auth()->user()->can('update_ticket')) {
+        if (!auth()->user()->can('update_ticket')) {
             return false;
         }
 
@@ -376,10 +396,10 @@ class ProjectBoard extends Page
 
     private function canManageTicket(?Ticket $ticket): bool
     {
-        if (! $ticket) {
+        if (!$ticket) {
             return false;
         }
-        if (! auth()->user()->can('update_ticket')) {
+        if (!auth()->user()->can('update_ticket')) {
             return false;
         }
         return auth()->user()->hasRole(['super_admin'])
@@ -400,7 +420,7 @@ class ProjectBoard extends Page
         }
 
         $tickets = collect();
-        
+
         if ($this->selectedProject) {
             $tickets = $this->selectedProject->tickets()
                 ->with(['assignees', 'status', 'project', 'epic'])
@@ -410,7 +430,7 @@ class ProjectBoard extends Page
             $ticketIds = $this->ticketStatuses->flatMap(function ($status) {
                 return $status->tickets->pluck('id');
             });
-            
+
             $tickets = Ticket::whereIn('id', $ticketIds)
                 ->with(['assignees', 'status', 'project', 'epic'])
                 ->orderBy('created_at', 'asc')
@@ -447,13 +467,13 @@ class ProjectBoard extends Page
                         document.body.removeChild(a);
                     });
             ");
-            
+
             Notification::make()
                 ->title('Export Successful')
                 ->body('Your Excel file is being downloaded.')
                 ->success()
                 ->send();
-            
+
         } catch (Exception $e) {
             Notification::make()
                 ->title('Export Failed')

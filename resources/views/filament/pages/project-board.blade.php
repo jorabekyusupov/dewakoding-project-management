@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    
+
     {{-- Project Selector --}}
     @if(!$selectedProject)
         <div class="mb-6">
@@ -13,19 +13,67 @@
                     </p>
                 </div>
 
+                {{-- Search Bar --}}
+                <div class="mb-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="searchProject"
+                            placeholder="Search projects by name or prefix..."
+                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        />
+                        @if($searchProject)
+                            <button
+                                wire:click="$set('searchProject', '')"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
                 @if($projects->isEmpty())
                     <div class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
                         <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">No Projects Available</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">You don't have access to any projects yet.</p>
                     </div>
+                @elseif($this->filteredProjects->isEmpty())
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                        <svg class="w-12 h-12 mb-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">No Projects Found</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Try adjusting your search terms</p>
+                    </div>
                 @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                        @foreach($projects as $project)
+                        @foreach($this->filteredProjects as $project)
                             <button
                                 wire:click="selectProject({{ $project->id }})"
                                 class="relative p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-all text-left overflow-hidden"
                                 style="border-left: 4px solid {{ $project->color ?? '#6B7280' }};"
                             >
+                                {{-- Pin Icon Badge --}}
+                                @if($project->is_pinned)
+                                    <div class="absolute top-2 right-2">
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full shadow-sm" 
+                                             style="background-color: {{ $project->color ?? '#6B7280' }};"
+                                             title="Pinned Project">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- Project Prefix Badge --}}
                                 @if($project->ticket_prefix)
                                     @php
@@ -103,12 +151,21 @@
                         <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Switch Project
                         </div>
-                        @foreach($projects as $project)
+                        @foreach($this->filteredProjects as $project)
                             <button
                                 wire:click="selectProject({{ $project->id }})"
                                 @click="open = false"
                                 class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left {{ $project->id === $selectedProject->id ? 'bg-gray-50 dark:bg-gray-700' : '' }}"
                             >
+                                @if($project->is_pinned)
+                                    <div class="flex items-center justify-center w-5 h-5 rounded-full shrink-0" 
+                                         style="background-color: {{ $project->color ?? '#6B7280' }};"
+                                         title="Pinned">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/>
+                                        </svg>
+                                    </div>
+                                @endif
                                 @if($project->ticket_prefix)
                                     @php
                                         $color = $project->color ?? '#6B7280';
@@ -148,11 +205,11 @@
                 touchStartX: 0,
                 touchStartY: 0,
                 scrollStartX: 0,
-                
+
                 moveTicketToStatus(ticketId, statusId) {
                     $wire.call('moveTicket', parseInt(ticketId), parseInt(statusId));
                 },
-                
+
                 init() {
                     this.$nextTick(() => {
                         this.removeAllEventListeners();
@@ -162,7 +219,7 @@
                         this.setupPageVisibilityListener();
                     });
                 },
-                
+
                 setupPageVisibilityListener() {
                     document.addEventListener('visibilitychange', () => {
                         if (!document.hidden) {
@@ -172,96 +229,96 @@
                             }, 100);
                         }
                     });
-                    
+
                     window.addEventListener('focus', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 100);
                     });
-                    
+
                     window.addEventListener('popstate', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 200);
                     });
-                    
+
                     document.addEventListener('livewire:navigated', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 300);
                     });
-                    
+
                     document.addEventListener('livewire:load', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 100);
                     });
-                    
+
                     document.addEventListener('livewire:updated', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 100);
                     });
-                    
+
                     window.addEventListener('ticket-updated', () => {
                         setTimeout(() => {
                             this.removeAllEventListeners();
                             this.attachAllEventListeners();
                         }, 150);
                     });
-                    
+
                     setInterval(() => {
                         if (document.visibilityState === 'visible') {
                             this.ensureDragDropInitialized();
                         }
                     }, 2000);
                 },
-                
+
                 ensureDragDropInitialized() {
                     const tickets = document.querySelectorAll('.ticket-card');
                     let needsReinitialization = false;
-                    
+
                     tickets.forEach(ticket => {
                         if (!ticket.getAttribute('draggable') || ticket.getAttribute('draggable') !== 'true') {
                             needsReinitialization = true;
                         }
                     });
-                    
+
                     if (needsReinitialization && tickets.length > 0) {
                         this.removeAllEventListeners();
                         this.attachAllEventListeners();
                     }
                 },
-                
+
                 setupTouchScrolling() {
                     const container = document.getElementById('board-container');
-                    
+
                     container.addEventListener('touchstart', (e) => {
                         this.touchStartX = e.touches[0].clientX;
                         this.touchStartY = e.touches[0].clientY;
                         this.scrollStartX = container.scrollLeft;
                     }, { passive: true });
-                    
+
                     container.addEventListener('touchmove', (e) => {
                         if (e.touches.length !== 1) return;
-                        
+
                         const touchX = e.touches[0].clientX;
                         const touchY = e.touches[0].clientY;
                         const moveX = this.touchStartX - touchX;
                         const moveY = this.touchStartY - touchY;
-                        
+
                         if (Math.abs(moveX) > Math.abs(moveY)) {
                             e.preventDefault();
                             container.scrollLeft = this.scrollStartX + moveX;
                         }
                     }, { passive: false });
                 },
-                
+
                 removeAllEventListeners() {
                     const tickets = document.querySelectorAll('.ticket-card');
                     tickets.forEach(ticket => {
@@ -269,7 +326,7 @@
                         const newTicket = ticket.cloneNode(true);
                         ticket.parentNode.replaceChild(newTicket, ticket);
                     });
-                    
+
                     const columns = document.querySelectorAll('.status-column');
                     columns.forEach(column => {
                         const newColumn = column.cloneNode(false);
@@ -281,34 +338,34 @@
                         }
                     });
                 },
-                
+
                 attachAllEventListeners() {
                     @if(!$this->canMoveTickets())
                         return;
                     @endif
-                    
+
                     const tickets = document.querySelectorAll('.ticket-card');
                     tickets.forEach(ticket => {
                         ticket.setAttribute('draggable', true);
-                        
+
                         ticket.addEventListener('dragstart', (e) => {
                             this.draggingTicket = ticket.getAttribute('data-ticket-id');
                             ticket.classList.add('opacity-50');
                             e.dataTransfer.effectAllowed = 'move';
                         });
-                        
+
                         ticket.addEventListener('dragend', () => {
                             ticket.classList.remove('opacity-50');
                             this.draggingTicket = null;
                         });
-                        
+
                         let longPressTimer;
                         let isDragging = false;
                         let originalColumn;
-                        
+
                         ticket.addEventListener('touchstart', (e) => {
                             if (isDragging) return;
-                            
+
                             longPressTimer = setTimeout(() => {
                                 originalColumn = ticket.closest('.status-column');
                                 this.draggingTicket = ticket.getAttribute('data-ticket-id');
@@ -317,21 +374,21 @@
                                 ticket.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
                             }, 500);
                         }, { passive: true });
-                        
+
                         ticket.addEventListener('touchmove', (e) => {
                             if (!isDragging) {
                                 clearTimeout(longPressTimer);
                                 return;
                             }
-                            
+
                             const touch = e.touches[0];
                             const columns = document.querySelectorAll('.status-column');
-                            
+
                             columns.forEach(column => {
                                 const rect = column.getBoundingClientRect();
-                                if (touch.clientX >= rect.left && 
-                                    touch.clientX <= rect.right && 
-                                    touch.clientY >= rect.top && 
+                                if (touch.clientX >= rect.left &&
+                                    touch.clientX <= rect.right &&
+                                    touch.clientY >= rect.top &&
                                     touch.clientY <= rect.bottom) {
                                     column.classList.add('bg-primary-50', 'dark:bg-primary-950');
                                 } else {
@@ -339,56 +396,56 @@
                                 }
                             });
                         });
-                        
+
                         ticket.addEventListener('touchend', (e) => {
                             clearTimeout(longPressTimer);
-                            
+
                             if (!isDragging) return;
-                            
+
                             isDragging = false;
                             ticket.classList.remove('opacity-50', 'relative', 'z-30');
                             ticket.style.boxShadow = '';
-                            
+
                             const touch = e.changedTouches[0];
                             const columns = document.querySelectorAll('.status-column');
-                            
+
                             let targetColumn = null;
                             columns.forEach(column => {
                                 const rect = column.getBoundingClientRect();
-                                if (touch.clientX >= rect.left && 
-                                    touch.clientX <= rect.right && 
-                                    touch.clientY >= rect.top && 
+                                if (touch.clientX >= rect.left &&
+                                    touch.clientX <= rect.right &&
+                                    touch.clientY >= rect.top &&
                                     touch.clientY <= rect.bottom) {
                                     targetColumn = column;
                                 }
                                 column.classList.remove('bg-primary-50', 'dark:bg-primary-950');
                             });
-                            
+
                             if (targetColumn && targetColumn !== originalColumn) {
                                 const statusId = targetColumn.getAttribute('data-status-id');
                                 const ticketId = this.draggingTicket;
-                                
+
                                 this.moveTicketToStatus(ticketId, statusId);
                             }
-                            
+
                             this.draggingTicket = null;
                         });
-                        
+
                         ticket.addEventListener('touchcancel', () => {
                             clearTimeout(longPressTimer);
                             if (!isDragging) return;
-                            
+
                             isDragging = false;
                             ticket.classList.remove('opacity-50', 'relative', 'z-30');
                             ticket.style.boxShadow = '';
                             this.draggingTicket = null;
-                            
+
                             document.querySelectorAll('.status-column').forEach(column => {
                                 column.classList.remove('bg-primary-50', 'dark:bg-primary-950');
                             });
                         });
                     });
-                    
+
                     const columns = document.querySelectorAll('.status-column');
                     columns.forEach(column => {
                         column.addEventListener('dragover', (e) => {
@@ -396,15 +453,15 @@
                             e.dataTransfer.dropEffect = 'move';
                             column.classList.add('bg-primary-50', 'dark:bg-primary-950');
                         });
-                        
+
                         column.addEventListener('dragleave', () => {
                             column.classList.remove('bg-primary-50', 'dark:bg-primary-950');
                         });
-                        
+
                         column.addEventListener('drop', (e) => {
                             e.preventDefault();
                             column.classList.remove('bg-primary-50', 'dark:bg-primary-950');
-                            
+
                             if (this.draggingTicket) {
                                 const statusId = column.getAttribute('data-status-id');
                                 const ticketId = this.draggingTicket;
@@ -426,7 +483,7 @@
             {{-- Scroll indicators --}}
             <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 dark:from-gray-800 to-transparent pointer-events-none z-10"
                  x-data="{ visible: false }"
-                 x-init="$nextTick(() => { 
+                 x-init="$nextTick(() => {
                      const container = document.getElementById('board-container');
                      container.addEventListener('scroll', () => {
                          visible = container.scrollLeft > 20;
@@ -435,10 +492,10 @@
                  x-show="visible"
                  x-transition.opacity
             ></div>
-            
+
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 dark:from-gray-800 to-transparent pointer-events-none z-10"
                  x-data="{ visible: false }"
-                 x-init="$nextTick(() => { 
+                 x-init="$nextTick(() => {
                      const container = document.getElementById('board-container');
                      visible = container.scrollWidth > container.clientWidth;
                      container.addEventListener('scroll', () => {
@@ -476,12 +533,12 @@
 
             <div class="inline-flex gap-4 pb-2 min-w-full">
                 @foreach ($ticketStatuses as $status)
-                    <div 
+                    <div
                         class="status-column rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-900"
                         style="width: calc(85vw - 2rem); min-width: 280px; max-width: 350px; height: 700px; @media (min-width: 640px) { width: calc((100vw - 6rem) / 2); height: 750px; } @media (min-width: 1024px) { width: calc((100vw - 8rem) / 3); height: 800px; } @media (min-width: 1280px) { width: calc((100vw - 10rem) / 4); height: 850px; }"
                         data-status-id="{{ $status->id }}"
                     >
-                        <div 
+                        <div
                             class="px-4 py-3 rounded-t-xl border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                             style="background-color: {{ $status->color ?? '#f3f4f6' }};"
                         >
@@ -497,11 +554,11 @@
                                         </div>
                                     @endif
                                 </h3>
-                                
+
                                 <!-- Sort Menu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
-                                    <button 
-                                        @click="open = !open" 
+                                    <button
+                                        @click="open = !open"
                                         @click.away="open = false"
                                         class="p-1 rounded hover:bg-black hover:bg-opacity-20 transition-colors"
                                         style="color: white;"
@@ -510,9 +567,9 @@
                                             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
                                         </svg>
                                     </button>
-                                    
-                                    <div 
-                                        x-show="open" 
+
+                                    <div
+                                        x-show="open"
                                         x-transition:enter="transition ease-out duration-100"
                                         x-transition:enter-start="transform opacity-0 scale-95"
                                         x-transition:enter-end="transform opacity-100 scale-100"
@@ -531,37 +588,37 @@
                                                     </svg>
                                                 </button>
                                             </div>
-                                            
+
                                             <div class="py-1">
-                                                <button 
+                                                <button
                                                     wire:click="setSortOrder({{ $status->id }}, 'date_created_newest')"
                                                     @click="open = false"
                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-white rounded"
                                                 >
                                                     Date created (newest first)
                                                 </button>
-                                                <button 
+                                                <button
                                                     wire:click="setSortOrder({{ $status->id }}, 'date_created_oldest')"
                                                     @click="open = false"
                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-white rounded"
                                                 >
                                                     Date created (oldest first)
                                                 </button>
-                                                <button 
+                                                <button
                                                     wire:click="setSortOrder({{ $status->id }}, 'card_name_alphabetical')"
                                                     @click="open = false"
                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-white rounded"
                                                 >
                                                     Card name (alphabetically)
                                                 </button>
-                                                <button 
+                                                <button
                                                     wire:click="setSortOrder({{ $status->id }}, 'due_date')"
                                                     @click="open = false"
                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-white rounded"
                                                 >
                                                     Due date
                                                 </button>
-                                                <button 
+                                                <button
                                                     wire:click="setSortOrder({{ $status->id }}, 'priority')"
                                                     @click="open = false"
                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-white rounded"
@@ -574,10 +631,10 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="p-3 flex flex-col gap-3 flex-1 overflow-y-auto" style="max-height: calc(100% - 60px);" x-data="{ visibleTickets: 10, totalTickets: {{ $status->tickets->count() }} }" x-init="$nextTick(() => { $el.addEventListener('scroll', () => { if ($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 100 && visibleTickets < totalTickets) { visibleTickets = Math.min(visibleTickets + 10, totalTickets); } }); })">
                             @foreach ($status->tickets as $index => $ticket)
-                                <div 
+                                <div
                                     class="ticket-card bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 cursor-move"
                                     data-ticket-id="{{ $ticket->id }}"
                                     x-show="{{ $index }} < visibleTickets"
@@ -602,15 +659,15 @@
                                             @endif
                                         </div>
                                     </div>
-                                    
+
                                     <h4 class="font-medium text-gray-900 dark:text-white mb-2">{{ $ticket->name }}</h4>
-                                    
+
                                     @if ($ticket->description)
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
                                             {{ \Illuminate\Support\Str::limit(strip_tags($ticket->description), 100) }}
                                         </p>
                                     @endif
-                                    
+
                                     <div class="flex justify-between items-center mt-2">
                                        @if ($ticket->assignees->isNotEmpty())
                                             <div class="flex flex-wrap gap-1 max-w-[180px]">
@@ -636,9 +693,9 @@
                                                 <span class="text-xs font-medium">Unassigned</span>
                                             </div>
                                         @endif
-                                        
+
                                         <button
-                                            type="button" 
+                                            type="button"
                                             wire:click="showTicketDetails({{ $ticket->id }})"
                                             class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-primary-600 hover:text-primary-500 dark:text-primary-500 dark:hover:text-primary-400 flex-shrink-0"
                                         >
@@ -647,7 +704,7 @@
                                     </div>
                                 </div>
                             @endforeach
-                            
+
                             @if ($status->tickets->isEmpty())
                                 <div class="flex items-center justify-center h-24 text-gray-500 dark:text-gray-400 text-sm italic border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
                                     No tickets
@@ -667,7 +724,7 @@
                         </div>
                     </div>
                 @endforeach
-                
+
                 @if ($ticketStatuses->isEmpty())
                     <div class="w-full flex items-center justify-center h-40 text-gray-500 dark:text-gray-400">
                         No status columns found for this project
