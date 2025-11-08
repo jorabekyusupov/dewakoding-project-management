@@ -64,7 +64,7 @@
                                 {{-- Pin Icon Badge --}}
                                 @if($project->is_pinned)
                                     <div class="absolute top-2 right-2">
-                                        <div class="flex items-center justify-center w-6 h-6 rounded-full shadow-sm" 
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full shadow-sm"
                                              style="background-color: {{ $project->color ?? '#6B7280' }};"
                                              title="Pinned Project">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -157,15 +157,6 @@
                                 @click="open = false"
                                 class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left {{ $project->id === $selectedProject->id ? 'bg-gray-50 dark:bg-gray-700' : '' }}"
                             >
-                                @if($project->is_pinned)
-                                    <div class="flex items-center justify-center w-5 h-5 rounded-full shrink-0" 
-                                         style="background-color: {{ $project->color ?? '#6B7280' }};"
-                                         title="Pinned">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/>
-                                        </svg>
-                                    </div>
-                                @endif
                                 @if($project->ticket_prefix)
                                     @php
                                         $color = $project->color ?? '#6B7280';
@@ -480,32 +471,6 @@
             class="relative overflow-x-auto pb-6 {{ !$this->canMoveTickets() ? 'view-only-mode' : '' }}"
             id="board-container"
         >
-            {{-- Scroll indicators --}}
-            <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 dark:from-gray-800 to-transparent pointer-events-none z-10"
-                 x-data="{ visible: false }"
-                 x-init="$nextTick(() => {
-                     const container = document.getElementById('board-container');
-                     container.addEventListener('scroll', () => {
-                         visible = container.scrollLeft > 20;
-                     });
-                 })"
-                 x-show="visible"
-                 x-transition.opacity
-            ></div>
-
-            <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 dark:from-gray-800 to-transparent pointer-events-none z-10"
-                 x-data="{ visible: false }"
-                 x-init="$nextTick(() => {
-                     const container = document.getElementById('board-container');
-                     visible = container.scrollWidth > container.clientWidth;
-                     container.addEventListener('scroll', () => {
-                         visible = container.scrollLeft + container.clientWidth < container.scrollWidth - 20;
-                     });
-                 })"
-                 x-show="visible"
-                 x-transition.opacity
-            ></div>
-
             {{-- Mobile swipe hint --}}
             <div class="md:hidden flex justify-center mb-2 text-xs text-gray-500 dark:text-gray-400 items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -534,8 +499,7 @@
             <div class="inline-flex gap-4 pb-2 min-w-full">
                 @foreach ($ticketStatuses as $status)
                     <div
-                        class="status-column rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-900"
-                        style="width: calc(85vw - 2rem); min-width: 280px; max-width: 350px; height: 700px; @media (min-width: 640px) { width: calc((100vw - 6rem) / 2); height: 750px; } @media (min-width: 1024px) { width: calc((100vw - 8rem) / 3); height: 800px; } @media (min-width: 1280px) { width: calc((100vw - 10rem) / 4); height: 850px; }"
+                        class="status-column rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-900 w-[calc(85vw-2rem)] min-w-[280px] max-w-[350px] h-[700px] sm:w-[calc((100vw-6rem)/2)] sm:h-[750px] lg:w-[calc((100vw-8rem)/3)] lg:h-[800px] xl:w-[calc((100vw-10rem)/4)] xl:h-[850px]"
                         data-status-id="{{ $status->id }}"
                     >
                         <div
