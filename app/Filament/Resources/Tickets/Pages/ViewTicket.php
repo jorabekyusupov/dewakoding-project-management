@@ -26,58 +26,112 @@ class ViewTicket extends ViewRecord
 
     public ?int $editingCommentId = null;
 
-    public function editComment(int $commentId): void
+    public function editCommentAction(): Action
     {
-        $comment = TicketComment::find($commentId);
+        return Action::make('editComment')
+            ->form([
+                Hidden::make('comment_id'),
+                RichEditor::make('comment')
+                    ->label('Edit Comment')
+                    ->required()
+                    ->toolbarButtons([
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo',
+                        'strike',
+                        'undo',
+                    ])
+                    ->extraInputAttributes(['style' => 'min-height: 10rem;']),
+            ])
+            ->fillForm(function (array $arguments): array {
+                $comment = TicketComment::find($arguments['commentId']);
 
-        if (!$comment) {
-            Notification::make()
-                ->title('Comment not found')
-                ->danger()
-                ->send();
-            return;
-        }
+                if (!$comment) {
+                    return [];
+                }
 
-        if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
-            Notification::make()
-                ->title('You do not have permission to edit this comment')
-                ->danger()
-                ->send();
-            return;
-        }
+                return [
+                    'comment_id' => $comment->id,
+                    'comment' => $comment->comment,
+                ];
+            })
+            ->action(function (array $data): void {
+                $comment = TicketComment::find($data['comment_id']);
 
-        $this->editingCommentId = $commentId;
-        $this->mountAction('editCommentAction', ['commentId' => $commentId]);
+                if (!$comment) {
+                    Notification::make()
+                        ->title('Comment not found')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+
+                if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
+                    Notification::make()
+                        ->title('You do not have permission to edit this comment')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+
+                $comment->update([
+                    'comment' => $data['comment'],
+                ]);
+
+                Notification::make()
+                    ->title('Comment updated successfully')
+                    ->success()
+                    ->send();
+
+                $this->dispatch('comment-updated');
+            })
+            ->modalHeading('Edit Comment')
+            ->modalSubmitActionLabel('Update')
+            ->modalWidth('2xl');
     }
 
-    public function deleteComment(int $commentId): void
+    public function deleteCommentAction(): Action
     {
-        $comment = TicketComment::find($commentId);
+        return Action::make('deleteComment')
+            ->requiresConfirmation()
+            ->modalHeading('Delete Comment')
+            ->modalDescription('Are you sure you want to delete this comment? This action cannot be undone.')
+            ->modalSubmitActionLabel('Yes, delete it')
+            ->color('danger')
+            ->icon('heroicon-o-trash')
+            ->action(function (array $arguments): void {
+                $comment = TicketComment::find($arguments['commentId']);
 
-        if (!$comment) {
-            Notification::make()
-                ->title('Comment not found')
-                ->danger()
-                ->send();
-            return;
-        }
+                if (!$comment) {
+                    Notification::make()
+                        ->title('Comment not found')
+                        ->danger()
+                        ->send();
+                    return;
+                }
 
-        if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
-            Notification::make()
-                ->title('You do not have permission to delete this comment')
-                ->danger()
-                ->send();
-            return;
-        }
+                if ($comment->user_id !== auth()->id() && !auth()->user()->hasRole(['super_admin'])) {
+                    Notification::make()
+                        ->title('You do not have permission to delete this comment')
+                        ->danger()
+                        ->send();
+                    return;
+                }
 
-        $comment->delete();
+                $comment->delete();
 
-        Notification::make()
-            ->title('Comment deleted successfully')
-            ->success()
-            ->send();
+                Notification::make()
+                    ->title('Comment deleted successfully')
+                    ->success()
+                    ->send();
 
-        $this->dispatch('$refresh');
+                $this->dispatch('comment-deleted');
+            });
     }
 
     protected function getHeaderActions(): array

@@ -31,7 +31,8 @@
                                     @if(auth()->user()->hasRole(['super_admin']) || $comment->user_id === auth()->id())
                                         <div class="flex gap-x-1">
                                             <!-- Edit Button -->
-                                            <button type="button" wire:click="editComment({{ $comment->id }})"
+                                            <button type="button"
+                                                wire:click="mountAction('editComment', { commentId: {{ $comment->id }} })"
                                                 class="p-1 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 title="Edit comment">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
@@ -42,8 +43,8 @@
                                             </button>
 
                                             <!-- Delete Button -->
-                                            <button type="button" wire:click="deleteComment({{ $comment->id }})"
-                                                wire:confirm="Are you sure you want to delete this comment?"
+                                            <button type="button"
+                                                wire:click="mountAction('deleteComment', { commentId: {{ $comment->id }} })"
                                                 class="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 title="Delete comment">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
