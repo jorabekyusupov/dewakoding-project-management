@@ -80,4 +80,5 @@ return [
         'restore_any' => 'Restore Any',
         'replicate' => 'Replicate',
     ],
+    'project_timeline' => 'Project Timeline',
 ];

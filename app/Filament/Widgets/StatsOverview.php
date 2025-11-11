@@ -17,6 +17,8 @@ class StatsOverview extends BaseWidget
 
     protected ?string $pollingInterval = '30s';
 
+    protected ?string $heading = 'Overview';
+
     protected function getStats(): array
     {
         $user = auth()->user();

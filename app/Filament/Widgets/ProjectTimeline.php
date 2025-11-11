@@ -12,14 +12,16 @@ use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 class ProjectTimeline extends Widget
 {
     use HasWidgetShield;
-    protected string $view = 'filament.widgets.project-timeline';
+    protected ?string $heading = 'Project Timeline';
     
+    protected string $view = 'filament.widgets.project-timeline';
+
     protected int | string | array $columnSpan = 'full';
 
     static ?int $sort = 4;
     
     public string $filter = 'pinned';
-    public string $viewMode = 'projects'; // 'projects' or 'tickets'
+    public string $viewMode = 'projects';
     
     public function getProjects()
     {
