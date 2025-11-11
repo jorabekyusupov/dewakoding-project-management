@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    
+
     {{-- Project Selector --}}
     @if(!$selectedProject)
         <div class="mb-6">
@@ -585,6 +585,11 @@
                                     x-transition:enter-start="opacity-0 transform scale-95"
                                     x-transition:enter-end="opacity-100 transform scale-100"
                                 >
+                                    @if ($ticket->created_at)
+                                        <span class="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                                                  {{__('created_at')}}:  {{ \Carbon\Carbon::parse($ticket->created_at)->format('M d, Y') }}
+                                                </span>
+                                    @endif
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="text-xs font-mono text-gray-500 dark:text-gray-400 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded truncate max-w-[120px] sm:max-w-none">
                                             {{ $ticket->uuid }}
@@ -600,6 +605,7 @@
                                                     {{ $ticket->due_date->format('M d') }}
                                                 </span>
                                             @endif
+
                                         </div>
                                     </div>
                                     
@@ -636,7 +642,7 @@
                                                 <span class="text-xs font-medium">{{ __('pages.project_board.unassigned') }}</span>
                                             </div>
                                         @endif
-                                        
+
                                         <button
                                             type="button" 
                                             wire:click="showTicketDetails({{ $ticket->id }})"
@@ -647,7 +653,7 @@
                                     </div>
                                 </div>
                             @endforeach
-                            
+
                             @if ($status->tickets->isEmpty())
                                 <div class="flex items-center justify-center h-24 text-gray-500 dark:text-gray-400 text-sm italic border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
                                     {{ __('pages.project_board.no_tickets') }}
