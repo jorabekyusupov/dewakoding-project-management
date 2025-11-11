@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources\Projects\RelationManagers;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DetachBulkAction;
 use App\Events\ProjectMemberAttached;
 use App\Events\ProjectMemberDetached;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,7 +45,7 @@ class MembersRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('email')
                     ->searchable()
-                    ->sortable()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -52,12 +54,26 @@ class MembersRelationManager extends RelationManager
                 AttachAction::make()
                     ->preloadRecordSelect()
                     ->recordSelectSearchColumns(['name', 'email'])
+                    ->recordSelect(fn (Select $select) => $select
+                        ->createOptionForm(fn (Schema $form) => UserResource::form($form)
+                            ->model(User::class)
+                        )
+                        ->createOptionUsing(function (array $data, Schema $form) {
+                            $user = User::create($data);
+                            $form->model($user)->saveRelationships();
+
+                            return $user->id;
+                        })
+                        ->createOptionAction(fn (Action $action) => $action
+                            ->modalWidth('lg')
+                        )
+                    )
                     ->label('Add Member')
                     ->after(function (Model $record) {
                         $project = $this->getOwnerRecord();
                         $user = User::find($record->id);
                         $assignedBy = auth()->user();
-                        
+
                         if ($user && $assignedBy) {
                             ProjectMemberAttached::dispatch($project, $user, $assignedBy);
                         }
@@ -70,7 +86,7 @@ class MembersRelationManager extends RelationManager
                         $project = $this->getOwnerRecord();
                         $user = User::find($record->id);
                         $removedBy = auth()->user();
-                        
+
                         if ($user && $removedBy) {
                             ProjectMemberDetached::dispatch($project, $user, $removedBy);
                         }
