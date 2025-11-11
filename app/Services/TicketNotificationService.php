@@ -91,7 +91,7 @@ class TicketNotificationService
         }
 
         $text = '🆕 Создана новая задача: ' . $ticket->name . PHP_EOL .
-            '🔗 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
+            '🔗 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
             '🆔 Проект: ' . $ticket->project->name . PHP_EOL .
             '👨‍💼 Создатель: ' . $ticket->creator->name . PHP_EOL .
             '❕ Статус: ' . $ticket->status->name . PHP_EOL .
@@ -111,7 +111,7 @@ class TicketNotificationService
 
         foreach ($assigneesChatIDs as $assigneesChatID) {
             $text = '🆕 Вам назначена новая задача: ' . $ticket->name . PHP_EOL .
-                '🔗 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
+                '🔗 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
                 '🆔 Проект: ' . $ticket->project->name . PHP_EOL .
                 '👨‍💼 Создатель: ' . $ticket->creator->name . PHP_EOL .
                 '❕ Статус: ' . $ticket->status->name . PHP_EOL .
@@ -136,7 +136,7 @@ class TicketNotificationService
             '🆔 Проект: ' . $ticket->project->name . PHP_EOL .
             '👥 Исполнители: ' . ($assignees ?: 'Не назначены') . PHP_EOL .
             '⏰ Время изменения: ' . now()->format('d.m.Y H:i') . PHP_EOL .
-            '🔗 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
+            '🔗 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
 
         $this->infoBot->send($projectChatId, $text, $threadId);
     }
@@ -151,7 +151,7 @@ class TicketNotificationService
             $text = '🔧 Статус задачи обновлен: ' . $newStatus . PHP_EOL .
                 '🆔 Задача: ' . $ticket->name . PHP_EOL .
                 '👨‍💼 Кто изменил: ' . auth()->user()->name . PHP_EOL .
-                '🔗 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
+                '🔗 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL .
                 '🆔 Проект: ' . $ticket->project->name . PHP_EOL .
                 '⏰ Время изменения: ' . now()->format('d.m.Y H:i') . PHP_EOL;
 
@@ -173,7 +173,7 @@ class TicketNotificationService
         $text = '💬 Новый комментарий в задаче: ' . $ticket->name . PHP_EOL .
             '👤 Автор: ' . $authorName . PHP_EOL .
             '📝 Комментарий: ' . $commentPreview . PHP_EOL .
-            '📎 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
+            '📎 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
 
         $this->infoBot->send($projectChatId, $text, $threadId);
     }
@@ -192,7 +192,7 @@ class TicketNotificationService
             $text = '💬 В задаче ' . $ticket->name . ' новый комментарий.' . PHP_EOL .
                 '👤 Автор: ' . $authorName . PHP_EOL .
                 '📝 ' . $commentPreview . PHP_EOL .
-                '📎 http://canban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
+                '📎 http://kanban.mo.local/admin/tickets/' . $ticket->id . PHP_EOL;
 
             $this->infoBot->send($assigneesChatID, $text);
         }
