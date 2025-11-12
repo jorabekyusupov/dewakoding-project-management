@@ -32,14 +32,14 @@ class ViewTicket extends ViewRecord
         $ticket = $this->getRecord();
         $project = $ticket->project;
 
-        $canComment = $project->members()->where('users.id', auth()->id())->exists();
+        $canComment = $project->members()->where('users.id', auth()->id())->exists() || auth()->user()->hasRole(['super_admin']);
 
         return [
             Actions\Action::make('download_file')
                 ->label('Download File')
                 ->translateLabel()
                 ->icon('heroicon-c-folder-arrow-down')
-                ->visible(fn (Ticket $record): bool => !empty($record->file))
+                ->visible(fn(Ticket $record): bool => !empty($record->file))
                 ->action(function ($record) {
                     return response()->download(storage_path('app/public/' . $record->file));
                 }),
@@ -85,7 +85,7 @@ class ViewTicket extends ViewRecord
             Action::make('back')
                 ->label(__('resources.ticket.view.actions.back_to_board'))
                 ->color('gray')
-                ->url(fn () => ProjectBoard::getUrl(['project_id' => $this->record->project_id])),
+                ->url(fn() => ProjectBoard::getUrl(['project_id' => $this->record->project_id])),
         ];
     }
 
@@ -93,7 +93,7 @@ class ViewTicket extends ViewRecord
     {
         $comment = TicketComment::find($id);
 
-        if (! $comment) {
+        if (!$comment) {
             Notification::make()
                 ->title(__('resources.ticket.view.notifications.comment_not_found'))
                 ->danger()
@@ -119,7 +119,7 @@ class ViewTicket extends ViewRecord
     {
         $comment = TicketComment::find($id);
 
-        if (! $comment) {
+        if (!$comment) {
             Notification::make()
                 ->title(__('resources.ticket.view.notifications.comment_not_found'))
                 ->danger()
@@ -180,7 +180,7 @@ class ViewTicket extends ViewRecord
                                 TextEntry::make('status.name')
                                     ->label('Status')
                                     ->badge()
-                                    ->color(fn ($record) => $record->status?->color ?? 'gray'),
+                                    ->color(fn($record) => $record->status?->color ?? 'gray'),
 
                                 TextEntry::make('assignees.name')
                                     ->label('Assigned To')
@@ -198,7 +198,7 @@ class ViewTicket extends ViewRecord
                                     ->label('Due Date')
                                     ->date('d M Y')
                                     ->icon('heroicon-o-calendar')
-                                    ->color(fn ($record) => $record->due_date && $record->due_date->isPast() ? 'danger' : 'success'),
+                                    ->color(fn($record) => $record->due_date && $record->due_date->isPast() ? 'danger' : 'success'),
                             ]),
                     ]),
 
@@ -279,13 +279,13 @@ class ViewTicket extends ViewRecord
                 ->mountUsing(function (Schema $schema, array $arguments) {
                     $commentId = $arguments['commentId'] ?? null;
 
-                    if (! $commentId) {
+                    if (!$commentId) {
                         return;
                     }
 
                     $comment = TicketComment::find($commentId);
 
-                    if (! $comment) {
+                    if (!$comment) {
                         return;
                     }
 
@@ -319,7 +319,7 @@ class ViewTicket extends ViewRecord
                 ->action(function (array $data) {
                     $comment = TicketComment::find($data['commentId']);
 
-                    if (! $comment) {
+                    if (!$comment) {
                         Notification::make()
                             ->title(__('resources.ticket.view.notifications.comment_not_found'))
                             ->danger()
@@ -329,7 +329,7 @@ class ViewTicket extends ViewRecord
                     }
 
                     // Check permissions
-                    if (! auth()->user()->can('update', $comment)) {
+                    if (!auth()->user()->can('update', $comment)) {
                         Notification::make()
                             ->title(__('resources.ticket.view.notifications.edit_forbidden'))
                             ->danger()
