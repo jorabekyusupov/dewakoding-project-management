@@ -58,7 +58,7 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->unique(
-                        ignoreRecord: true
+                        ignoreRecord: true 
                     )
                     ->maxLength(255),
                 DateTimePicker::make('email_verified_at'),
@@ -102,7 +102,7 @@ class UserResource extends Resource
                 TextColumn::make('projects_count')
                     ->label(__('resources.users.columns.projects'))
                     ->counts('projects')
-                    ->tooltip(fn (User $record): string => $record->projects->pluck('name')->join(', ') ?: __('resources.users.tooltips.no_projects'))
+                    ->tooltip(fn (User $record): string => $record->projects->pluck('name')->join(', ') ?: 'No Projects')
                     ->sortable(),
 
                 TextColumn::make('assigned_tickets_count')

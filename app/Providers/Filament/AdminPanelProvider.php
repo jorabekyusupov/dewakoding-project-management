@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentAsset::register([
             Css::make('custom', asset('css/filament/theme/theme.css')),
         ]);
-        $panel
+    $panel
             ->spa()
             ->databaseTransactions()
             ->default()
