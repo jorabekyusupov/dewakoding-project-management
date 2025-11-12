@@ -58,7 +58,7 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->unique(
-                        ignoreRecord: true 
+                        ignoreRecord: true
                     )
                     ->maxLength(255),
                 DateTimePicker::make('email_verified_at'),
