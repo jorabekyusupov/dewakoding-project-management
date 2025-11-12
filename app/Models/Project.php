@@ -33,19 +33,16 @@ class Project extends Model
         'pinned_date' => 'datetime',
     ];
 
-    // Helper method to check if project is pinned
     public function getIsPinnedAttribute(): bool
     {
         return !is_null($this->pinned_date);
     }
 
-    // Helper method to pin project
     public function pin(): void
     {
         $this->update(['pinned_date' => now()]);
     }
 
-    // Helper method to unpin project
     public function unpin(): void
     {
         $this->update(['pinned_date' => null]);
@@ -67,7 +64,6 @@ class Project extends Model
             ->withTimestamps();
     }
 
-    // Add this method for Filament RelationManager compatibility
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'project_members')

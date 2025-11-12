@@ -70,13 +70,11 @@ class Ticket extends Model
         return $this->belongsTo(TicketStatus::class, 'ticket_status_id');
     }
 
-    // Multi-user assignment relationship
     public function assignees(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'ticket_users');
     }
 
-    // Creator relationship
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -102,7 +100,6 @@ class Ticket extends Model
         return $this->belongsTo(TicketPriority::class, 'priority_id');
     }
 
-    // Helper methods
     public function assignUser(User $user): void
     {
         $this->assignees()->syncWithoutDetaching($user->id);

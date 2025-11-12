@@ -2,29 +2,26 @@
 
 namespace App\Filament\Resources\Users;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\BulkAction;
-use Filament\Forms\Components\Radio;
-use App\Filament\Resources\Users\RelationManagers\ProjectsRelationManager;
-use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\RelationManagers\ProjectsRelationManager;
 use App\Models\User;
-use Filament\Forms;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
@@ -33,7 +30,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $navigationLabel = null;
 
@@ -61,7 +58,7 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->unique(
-                        ignoreRecord: true 
+                        ignoreRecord: true
                     )
                     ->maxLength(255),
                 DateTimePicker::make('email_verified_at'),
@@ -70,7 +67,7 @@ class UserResource extends Resource
                     ->dehydrateStateUsing(fn ($state) => ! empty($state) ? Hash::make($state) : null
                     )
                     ->dehydrated(fn ($state) => ! empty($state))
-                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->required(fn (string $operation): bool => in_array($operation, ['create', 'attach.createOption']))
                     ->maxLength(255),
                 Select::make('roles')
                     ->relationship('roles', 'name')
@@ -160,7 +157,7 @@ class UserResource extends Resource
                 Filter::make('email_unverified')
                     ->label(__('resources.users.filters.email_unverified'))
                     ->query(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
-            ],Tables\Enums\FiltersLayout::AboveContent)
+            ],FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
                 ViewAction::make(),
@@ -168,7 +165,7 @@ class UserResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    
+
                     // NEW: Bulk action to assign role
                     BulkAction::make('assignRole')
                         ->label(__('resources.users.actions.assign_role'))
@@ -181,7 +178,7 @@ class UserResource extends Resource
                                 ->preload()
                                 ->searchable()
                                 ->required(),
-                            
+
                             Radio::make('role_mode')
                                 ->label(__('resources.users.actions.assign_role.mode'))
                                 ->options([
@@ -217,7 +214,7 @@ class UserResource extends Resource
         return [
             'index' => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit')
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 
