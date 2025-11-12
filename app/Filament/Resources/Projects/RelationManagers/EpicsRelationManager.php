@@ -32,7 +32,7 @@ class EpicsRelationManager extends RelationManager
     }
     public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 TextInput::make('name')
                     ->required()
